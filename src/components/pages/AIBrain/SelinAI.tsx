@@ -1863,9 +1863,10 @@ export default function SelinAI() {
               <Paper
                 withBorder
                 h={"100%"}
-                className={`transition-all duration-300 ${
-                  showSidebar ? "w-[300px]" : "w-[70px]"
-                }`}
+                className={`transition-all duration-300`}
+                sx={{
+                  width: showSidebar ? "20%" : "5%",
+                }}
               >
                 <Flex
                   align={"center"}
@@ -3512,7 +3513,13 @@ export default function SelinAI() {
                   </ScrollArea>
                 </Box>
               </Paper>
-              <Flex gap="md" p="sm" className={`${"w-[calc(100%-90px)]"}`}>
+              <Flex
+                gap="md"
+                p="sm"
+                sx={{
+                  width: showSidebar ? "80%" : "95%",
+                }}
+              >
                 <DragDropContext
                   onDragEnd={(result) => {
                     if (
@@ -3890,252 +3897,258 @@ const SegmentChat = (props: any) => {
     }
   }
 
+  console.log("segmentChat ChatFullSize: ", props.chatfullSize);
+
   return (
-    <>
-      <Paper
-        withBorder
-        shadow="sm"
-        radius={"md"}
-        w={props.chatfullSize ? "48%" : "100%"}
-        h={"90vh"}
-        className=" transition-all duration-300"
+    <Paper
+      withBorder
+      shadow="sm"
+      radius={"md"}
+      sx={{
+        maxWidth: props.chatfullSize ? "35%" : "100%",
+        width: props.chatfullSize ? "35%" : "100%",
+      }}
+      h={"90vh"}
+      className=" transition-all duration-300"
+    >
+      <Flex
+        px={"md"}
+        py={"xs"}
+        align={"center"}
+        gap={5}
+        bg={"white"}
+        className={"rounded-t-md"}
+        justify={"space-between"}
       >
-        <Flex
-          px={"md"}
-          py={"xs"}
-          align={"center"}
-          gap={5}
-          bg={"white"}
-          className={" rounded-t-md"}
-          justify={"space-between"}
-        >
-          <Flex align={"center"}>
-            <IconSparkles size={"1rem"} color="#E25DEE" fill="#E25DEE" />
-            <Text fw={600}>Chat with Selix</Text>
-          </Flex>
-          <Popover width={360} shadow={"md"} position={"left"} withinPortal>
-            <Popover.Target>
-              <Badge color="gray" variant="outline" radius={4} ml="auto">
-                {(() => {
-                  let emoji = "🧠";
-
-                  switch (props.memory?.session_mode) {
-                    case "campaign_builder":
-                      emoji = "⚙️";
-                      break;
-                    case "ingestion_mode":
-                      emoji = "🍗";
-                      break;
-                    case "supervisor_mode":
-                      emoji = "🧑";
-                      break;
-                    default:
-                      emoji = "🧠";
-                  }
-
-                  return `${emoji}`;
-                })()}
-              </Badge>
-            </Popover.Target>
-            <Popover.Dropdown>
-              <Flex align={"center"} direction={"column"}>
-                <LoadingOverlay visible={isLoading} zIndex={2} />
-                <Flex
-                  justify="space-between"
-                  align="center"
-                  mb="xs"
-                  gap={"4px"}
-                >
-                  <Title order={5}>👷 Worker Memory</Title>
-
-                  {props.memory?.session_mode && (
-                    <Tooltip
-                      label={
-                        "Current Goal: " + props.memory?.session_current_goal
-                      }
-                      withArrow
-                    >
-                      <Badge
-                        color="gray"
-                        variant="outline"
-                        radius={4}
-                        ml="auto"
-                      >
-                        {(() => {
-                          let emoji = "🧠";
-
-                          switch (props.memory?.session_mode) {
-                            case "campaign_builder":
-                              emoji = "⚙️";
-                              break;
-                            case "ingestion_mode":
-                              emoji = "🍗";
-                              break;
-                            case "supervisor_mode":
-                              emoji = "🧑";
-                              break;
-                            default:
-                              emoji = "🧠";
-                          }
-
-                          return `${emoji} ${props.memory?.session_mode?.replace(
-                            "-",
-                            " "
-                          )}`;
-                        })()}
-                      </Badge>
-                    </Tooltip>
-                  )}
-                </Flex>
-                <Card withBorder>
-                  {logs && logs.length > 0 && (
-                    <Text
-                      size="sm"
-                      p="xs"
-                      sx={{
-                        cursor: "pointer",
-                        whiteSpace: "normal",
-                        wordWrap: "break-word",
-                      }}
-                      dangerouslySetInnerHTML={{
-                        __html: (
-                          logs[0].json_data?.metadata ??
-                          logs[0].json_data?.memory ??
-                          "No memory"
-                        )?.replace(/\n/g, "<br>"),
-                      }}
-                    />
-                  )}
-                </Card>
-              </Flex>
-            </Popover.Dropdown>
-          </Popover>
+        <Flex align={"center"}>
+          <IconSparkles size={"1rem"} color="#E25DEE" fill="#E25DEE" />
+          <Text fw={600}>Chat with Selix</Text>
         </Flex>
-        <Divider bg="gray" />
-        <div style={{ position: "relative", height: "48vh" }}>
-          <ScrollArea
-            h={"53vh"}
-            viewportRef={viewport}
-            scrollHideDelay={4000}
-            style={{
-              overflow: "hidden",
-              // transform: !normalInputMode ? "translateY(-250px)" : "none",
-              transition: "transform 0.3s ease",
-            }}
-          >
-            {messages.length > 0 ? (
-              <Flex
-                direction={"column"}
-                gap={"sm"}
-                p={"md"}
-                h={"100%"}
-                className=" overflow-auto"
-              >
-                {messages.map((message: MessageType, index: number) => {
-                  return (
-                    <>
-                      {message.type === "message" ||
-                      message.type === "slack" ? (
-                        <>
-                          {/* name section */}
-                          <Flex
-                            gap={4}
-                            align={"center"}
-                            ml={message.role === "user" ? "auto" : "0"}
-                            style={{
-                              width:
-                                messageRefs.current[index]?.offsetWidth ||
-                                "85%",
-                              marginBottom: "-10px",
-                            }}
-                          >
-                            <Avatar
-                              src={
-                                message.sender_name
-                                  ? null
-                                  : message.role === "user"
-                                  ? userData.img_url
-                                  : Logo
-                              }
-                              size={"xs"}
-                              radius={"xl"}
-                            />
-                            <Text fw={600} size={"xs"}>
-                              {message.sender_name
-                                ? message.sender_name
-                                : message.role !== "assistant"
-                                ? userData.sdr_name
-                                : "Selix AI"}
-                              {message.type === "slack" &&
-                                message.slack_channel && (
-                                  <Text component="span" fw={700}>
-                                    {" via "}
-                                    <img
-                                      src={SlackLogo}
-                                      alt="slack"
-                                      width={10}
-                                      height={10}
-                                      style={{ margin: "0 4px" }}
-                                    />
-                                    {" Slack"}
-                                    <Text
-                                      component="a"
-                                      href={`https://slack.com/app_redirect?channel=${message.slack_channel}`}
-                                      style={{
-                                        color: "#1E90FF",
-                                        textDecoration: "underline",
-                                        marginLeft: "4px",
-                                      }}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                    >
-                                      #{message.slack_channel}
-                                    </Text>
-                                  </Text>
-                                )}
-                            </Text>
-                            {message.role !== "user" &&
-                              message.message !== "loading" &&
-                              index === messages.length - 1 && (
-                                <Flex align="center" gap="xs">
-                                  {showLoader && (
-                                    <Loader
-                                      variant="bars"
-                                      color="grape"
-                                      size="xs"
-                                      ml={10}
-                                    />
-                                  )}
-                                </Flex>
-                              )}
-                          </Flex>
-                          {/* rest of message */}
-                          <Flex
-                            direction={"column"}
-                            maw={"85%"}
-                            gap={4}
-                            key={index}
-                            ml={message.role === "user" ? "auto" : "0"}
-                            style={{
-                              backgroundColor: message.hidden_until
-                                ? "#ADD8E6"
+        <Popover width={360} shadow={"md"} position={"left"} withinPortal>
+          <Popover.Target>
+            <Badge color="gray" variant="outline" radius={4} ml="auto">
+              {(() => {
+                let emoji = "🧠";
+
+                switch (props.memory?.session_mode) {
+                  case "campaign_builder":
+                    emoji = "⚙️";
+                    break;
+                  case "ingestion_mode":
+                    emoji = "🍗";
+                    break;
+                  case "supervisor_mode":
+                    emoji = "🧑";
+                    break;
+                  default:
+                    emoji = "🧠";
+                }
+
+                return `${emoji}`;
+              })()}
+            </Badge>
+          </Popover.Target>
+          <Popover.Dropdown>
+            <Flex align={"center"} direction={"column"}>
+              <LoadingOverlay visible={isLoading} zIndex={2} />
+              <Flex justify="space-between" align="center" mb="xs" gap={"4px"}>
+                <Title order={5}>👷 Worker Memory</Title>
+
+                {props.memory?.session_mode && (
+                  <Tooltip
+                    label={
+                      "Current Goal: " + props.memory?.session_current_goal
+                    }
+                    withArrow
+                  >
+                    <Badge color="gray" variant="outline" radius={4} ml="auto">
+                      {(() => {
+                        let emoji = "🧠";
+
+                        switch (props.memory?.session_mode) {
+                          case "campaign_builder":
+                            emoji = "⚙️";
+                            break;
+                          case "ingestion_mode":
+                            emoji = "🍗";
+                            break;
+                          case "supervisor_mode":
+                            emoji = "🧑";
+                            break;
+                          default:
+                            emoji = "🧠";
+                        }
+
+                        return `${emoji} ${props.memory?.session_mode?.replace(
+                          "-",
+                          " "
+                        )}`;
+                      })()}
+                    </Badge>
+                  </Tooltip>
+                )}
+              </Flex>
+              <Card withBorder>
+                {logs && logs.length > 0 && (
+                  <Text
+                    size="sm"
+                    p="xs"
+                    sx={{
+                      cursor: "pointer",
+                      whiteSpace: "normal",
+                      wordWrap: "break-word",
+                    }}
+                    dangerouslySetInnerHTML={{
+                      __html: (
+                        logs[0].json_data?.metadata ??
+                        logs[0].json_data?.memory ??
+                        "No memory"
+                      )?.replace(/\n/g, "<br>"),
+                    }}
+                  />
+                )}
+              </Card>
+            </Flex>
+          </Popover.Dropdown>
+        </Popover>
+      </Flex>
+      <Divider bg="gray" />
+      <Box style={{ position: "relative", height: "48vh" }}>
+        <ScrollArea
+          h={"53vh"}
+          viewportRef={viewport}
+          scrollHideDelay={4000}
+          style={{
+            overflow: "hidden",
+            // transform: !normalInputMode ? "translateY(-250px)" : "none",
+            transition: "transform 0.3s ease",
+          }}
+        >
+          {messages.length > 0 ? (
+            <Flex
+              direction={"column"}
+              gap={"sm"}
+              p={"md"}
+              h={"100%"}
+              style={{ width: "100%", overflow: "auto" }}
+            >
+              {messages.map((message: MessageType, index: number) => {
+                return (
+                  <>
+                    {message.type === "message" || message.type === "slack" ? (
+                      <>
+                        {/* name section */}
+                        <Flex
+                          gap={4}
+                          align={"center"}
+                          ml={message.role === "user" ? "auto" : "0"}
+                          style={{
+                            width:
+                              messageRefs.current[index]?.offsetWidth || "85%",
+                            marginBottom: "-10px",
+                          }}
+                        >
+                          <Avatar
+                            src={
+                              message.sender_name
+                                ? null
                                 : message.role === "user"
-                                ? "#f7ffff"
-                                : "#fafafa",
-                              borderRadius: "10px",
-                              border: "1px solid #e7ebef",
-                              padding: "10px",
-                            }}
-                            ref={(el) => (messageRefs.current[index] = el)}
+                                ? userData.img_url
+                                : Logo
+                            }
+                            size={"xs"}
+                            radius={"xl"}
+                          />
+                          <Text fw={600} size={"xs"}>
+                            {message.sender_name
+                              ? message.sender_name
+                              : message.role !== "assistant"
+                              ? userData.sdr_name
+                              : "Selix AI"}
+                            {message.type === "slack" &&
+                              message.slack_channel && (
+                                <Text component="span" fw={700}>
+                                  {" via "}
+                                  <img
+                                    src={SlackLogo}
+                                    alt="slack"
+                                    width={10}
+                                    height={10}
+                                    style={{ margin: "0 4px" }}
+                                  />
+                                  {" Slack"}
+                                  <Text
+                                    component="a"
+                                    href={`https://slack.com/app_redirect?channel=${message.slack_channel}`}
+                                    style={{
+                                      color: "#1E90FF",
+                                      textDecoration: "underline",
+                                      marginLeft: "4px",
+                                    }}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                  >
+                                    #{message.slack_channel}
+                                  </Text>
+                                </Text>
+                              )}
+                          </Text>
+                          {message.role !== "user" &&
+                            message.message !== "loading" &&
+                            index === messages.length - 1 && (
+                              <Flex align="center" gap="xs">
+                                {showLoader && (
+                                  <Loader
+                                    variant="bars"
+                                    color="grape"
+                                    size="xs"
+                                    ml={10}
+                                  />
+                                )}
+                              </Flex>
+                            )}
+                        </Flex>
+                        {/* rest of message */}
+                        <Flex
+                          direction={"column"}
+                          maw={"85%"}
+                          gap={4}
+                          key={index}
+                          ml={message.role === "user" ? "auto" : "0"}
+                          style={{
+                            backgroundColor: message.hidden_until
+                              ? "#ADD8E6"
+                              : message.role === "user"
+                              ? "#f7ffff"
+                              : "#fafafa",
+                            borderRadius: "10px",
+                            border: "1px solid #e7ebef",
+                            padding: "10px",
+                          }}
+                          ref={(el) => (messageRefs.current[index] = el)}
+                        >
+                          <Flex
+                            className=" rounded-lg rounded-br-none"
+                            px={"sm"}
+                            py={7}
                           >
-                            <Flex
-                              className=" rounded-lg rounded-br-none"
-                              px={"sm"}
-                              py={7}
-                            >
-                              <Text size={"xs"} fw={500}>
-                                {message.role === "user" ? (
-                                  message.message
+                            <Text size={"xs"} fw={500}>
+                              {message.role === "user" ? (
+                                message.message
+                                  .split(" ")
+                                  .map(
+                                    (x) =>
+                                      x.substring(0, 40) +
+                                      (x.length > 40 ? "..." : "")
+                                  )
+                                  .join(" ")
+                              ) : message.message === "loading" ? (
+                                <Flex align="center" gap="xs">
+                                  <Loader color="black" variant="dots" />
+                                </Flex>
+                              ) : (
+                                <Text>
+                                  {message.message
                                     .split(" ")
                                     .map(
                                       (x) =>
@@ -4143,149 +4156,138 @@ const SegmentChat = (props: any) => {
                                         (x.length > 40 ? "..." : "")
                                     )
                                     .join(" ")
-                                ) : message.message === "loading" ? (
-                                  <Flex align="center" gap="xs">
-                                    <Loader color="black" variant="dots" />
-                                  </Flex>
-                                ) : (
-                                  <Text>
-                                    {message.message
-                                      .split(" ")
-                                      .map(
-                                        (x) =>
-                                          x.substring(0, 40) +
-                                          (x.length > 40 ? "..." : "")
-                                      )
-                                      .join(" ")
-                                      .split("\n")
-                                      .map((line, index) => (
-                                        <Fragment key={index}>
-                                          {line}
-                                          <br />
-                                        </Fragment>
-                                      ))}
-                                  </Text>
-                                )}
-                              </Text>
-                            </Flex>
+                                    .split("\n")
+                                    .map((line, index) => (
+                                      <Fragment key={index}>
+                                        {line}
+                                        <br />
+                                      </Fragment>
+                                    ))}
+                                </Text>
+                              )}
+                            </Text>
+                          </Flex>
+                          <Text
+                            color="gray"
+                            size={"xs"}
+                            ml={message.role === "user" ? "auto" : "0"}
+                          >
                             <Text
-                              color="gray"
-                              size={"xs"}
+                              color={message.hidden_until ? "white" : "gray"}
+                              size="xs"
                               ml={message.role === "user" ? "auto" : "0"}
                             >
-                              <Text
-                                color={message.hidden_until ? "white" : "gray"}
-                                size="xs"
-                                ml={message.role === "user" ? "auto" : "0"}
-                              >
-                                {message.hidden_until ? (
-                                  <>
-                                    <style>
-                                      {`
+                              {message.hidden_until ? (
+                                <>
+                                  <style>
+                                    {`
                                         @keyframes spin {
                                           0% { transform: rotate(0deg); }
                                           100% { transform: rotate(360deg); }
                                         }
                                       `}
-                                    </style>
-                                    <IconClockHour12
-                                      size={"0.8rem"}
-                                      style={{
-                                        animation: "spin 2s linear infinite",
-                                      }}
-                                    />{" "}
-                                    {moment(message.hidden_until).format(
-                                      "MMMM D, h:mm A"
-                                    )}
-                                  </>
-                                ) : (
-                                  moment(message.created_time).format(
+                                  </style>
+                                  <IconClockHour12
+                                    size={"0.8rem"}
+                                    style={{
+                                      animation: "spin 2s linear infinite",
+                                    }}
+                                  />{" "}
+                                  {moment(message.hidden_until).format(
                                     "MMMM D, h:mm A"
-                                  )
-                                )}
-                              </Text>
-                            </Text>
-                          </Flex>
-                        </>
-                      ) : (
-                        <Card
-                          key={index}
-                          className="border border-[#E25DEE] border-solid rounded-md"
-                          shadow="sm"
-                          withBorder
-                          radius="md"
-                          style={{ marginLeft: 0 }}
-                        >
-                          <Card.Section>
-                            <Flex
-                              justify="space-between"
-                              align="center"
-                              className="bg-[#E25DEE] py-2 px-3 text-white text-semibold cursor-pointer"
-                              onClick={() => toggleCardCollapse(index)}
-                            >
-                              {!messages[index + 1] && (
-                                <Loader size="sm" color="white" />
-                              )}
-
-                              <Text fw={600} size="xs">
-                                ✨ {message.action_title}
-                              </Text>
-                              {!uncollapsedCards[index] ? (
-                                <IconChevronDown
-                                  size={16}
-                                  className="transition-transform"
-                                />
+                                  )}
+                                </>
                               ) : (
-                                <IconChevronUp
-                                  size={16}
-                                  className="transition-transform"
-                                />
+                                moment(message.created_time).format(
+                                  "MMMM D, h:mm A"
+                                )
                               )}
-                            </Flex>
-                          </Card.Section>
-                          {uncollapsedCards[index] && (
-                            <Text size="xs" fw={400} color="gray" mt="xs">
-                              <div
-                                dangerouslySetInnerHTML={{
-                                  __html:
-                                    message.action_description?.replaceAll(
-                                      "\n",
-                                      "<br/><br/>"
-                                    ) || "",
-                                }}
-                              />
                             </Text>
-                          )}
-                        </Card>
-                      )}
-                    </>
-                  );
-                })}
-                {/* {loading && <Loader color="blue" type="dots" />} */}
-              </Flex>
-            ) : (
-              <>
-                <Flex
-                  direction={"column"}
-                  gap={"sm"}
-                  p={"md"}
-                  h={"100%"}
-                  className=" overflow-auto"
-                >
-                  {messages.map((message: MessageType, index: number) => {
-                    return (
-                      <>
-                        {message.type === "message" ? (
+                          </Text>
+                        </Flex>
+                      </>
+                    ) : (
+                      <Card
+                        key={index}
+                        className="border border-[#E25DEE] border-solid rounded-md"
+                        shadow="sm"
+                        withBorder
+                        radius="md"
+                        style={{ marginLeft: 0 }}
+                      >
+                        <Card.Section>
                           <Flex
-                            direction={"column"}
-                            w={"50%"}
-                            gap={4}
-                            key={index}
+                            justify="space-between"
                             align="center"
-                            justify="center"
-                            mx="auto"
+                            className="bg-[#E25DEE] py-2 px-3 text-white text-semibold cursor-pointer"
+                            onClick={() => toggleCardCollapse(index)}
                           >
-                            {/* <Flex gap={4} align={"center"}>
+                            {!messages[index + 1] && (
+                              <Loader size="sm" color="white" />
+                            )}
+
+                            <Text fw={600} size="xs">
+                              ✨ {message.action_title}
+                            </Text>
+                            {!uncollapsedCards[index] ? (
+                              <IconChevronDown
+                                size={16}
+                                className="transition-transform"
+                              />
+                            ) : (
+                              <IconChevronUp
+                                size={16}
+                                className="transition-transform"
+                              />
+                            )}
+                          </Flex>
+                        </Card.Section>
+                        {uncollapsedCards[index] && (
+                          <Text size="xs" fw={400} color="gray" mt="xs">
+                            <div
+                              dangerouslySetInnerHTML={{
+                                __html:
+                                  message.action_description?.replaceAll(
+                                    "\n",
+                                    "<br/><br/>"
+                                  ) || "",
+                              }}
+                            />
+                          </Text>
+                        )}
+                      </Card>
+                    )}
+                  </>
+                );
+              })}
+              {/* {loading && <Loader color="blue" type="dots" />} */}
+            </Flex>
+          ) : (
+            <>
+              <Flex
+                direction={"column"}
+                gap={"sm"}
+                p={"md"}
+                h={"100%"}
+                sx={{
+                  width: "100%",
+                  overflow: "auto"
+                }}
+              >
+                {messages.map((message: MessageType, index: number) => {
+                  return (
+                    <>
+                      {message.type === "message" ? (
+                        <Flex
+                          direction={"column"}
+                          w={"50%"}
+                          gap={4}
+                          key={index}
+                          align="center"
+                          justify="center"
+                          mx="auto"
+                        >
+                          {/* <Flex gap={4} align={"center"}>
                           <Avatar
                             src={
                               message.role === "user" ? userData.img_url : Logo
@@ -4310,7 +4312,7 @@ const SegmentChat = (props: any) => {
                               </Flex>
                             )}
                         </Flex> */}
-                            {/* <Flex
+                          {/* <Flex
                           className="border-[2px] border-solid border-[#e7ebef] rounded-lg rounded-br-none"
                           px={"sm"}
                           py={7}
@@ -4336,7 +4338,7 @@ const SegmentChat = (props: any) => {
                             )}
                           </Text>
                         </Flex> */}
-                            {/* <Text
+                          {/* <Text
                           color="gray"
                           size={"xs"}
                           ml={message.role === "user" ? "auto" : "0"}
@@ -4345,221 +4347,221 @@ const SegmentChat = (props: any) => {
                             "MMMM D, h:mm A"
                           )}
                         </Text> */}
-                          </Flex>
-                        ) : (
-                          <Card
-                            key={index}
-                            className="border border-[#E25DEE] border-solid rounded-md"
-                            shadow="sm"
-                            withBorder
-                            radius="md"
-                            style={{ marginLeft: 0 }}
-                          >
-                            <Card.Section>
-                              <Flex
-                                justify="space-between"
-                                align="center"
-                                className="bg-[#E25DEE] py-2 px-3 text-white text-semibold cursor-pointer"
-                                onClick={() => toggleCardCollapse(index)}
-                              >
-                                <Text fw={600} size="xs">
-                                  ✨ Executing: {message.action_title}
-                                </Text>
-                                {uncollapsedCards[index] ? (
-                                  <IconChevronDown
-                                    size={16}
-                                    className="transition-transform"
-                                  />
-                                ) : (
-                                  <IconChevronUp
-                                    size={16}
-                                    className="transition-transform"
-                                  />
-                                )}
-                              </Flex>
-                            </Card.Section>
-                            {!uncollapsedCards[index] && (
-                              <Text size="xs" fw={400} color="gray" mt="xs">
-                                <div
-                                  dangerouslySetInnerHTML={{
-                                    __html:
-                                      message.action_description?.replaceAll(
-                                        "\n",
-                                        "<br/><br/>"
-                                      ) || "",
-                                  }}
-                                />
+                        </Flex>
+                      ) : (
+                        <Card
+                          key={index}
+                          className="border border-[#E25DEE] border-solid rounded-md"
+                          shadow="sm"
+                          withBorder
+                          radius="md"
+                          style={{ marginLeft: 0 }}
+                        >
+                          <Card.Section>
+                            <Flex
+                              justify="space-between"
+                              align="center"
+                              className="bg-[#E25DEE] py-2 px-3 text-white text-semibold cursor-pointer"
+                              onClick={() => toggleCardCollapse(index)}
+                            >
+                              <Text fw={600} size="xs">
+                                ✨ Executing: {message.action_title}
                               </Text>
-                            )}
-                          </Card>
-                        )}
-                      </>
-                    );
-                  })}
-                </Flex>
-                {/* <div className="absolute bottom-2 right-0 w-5/6 pr-4"> */}
-                {/*   <Paper */}
-                {/*     withBorder */}
-                {/*     p={"md"} */}
-                {/*     radius={"lg"} */}
-                {/*     className="bg-white shadow-lg" */}
-                {/*     style={{ */}
-                {/*       border: "2px solid #E25DEE", */}
-                {/*       boxShadow: "0 8px 16px rgba(226, 93, 238, 0.2)", */}
-                {/*     }} */}
-                {/*   > */}
-                {/*     <Text fw={700} size={"md"} color="#E25DEE" mb={"sm"}> */}
-                {/*       💡 Suggestions */}
-                {/*     </Text> */}
-                {/*     <div className="flex flex-col gap-2"> */}
-                {/*       {suggestedFirstMessage.map((message, index) => ( */}
-                {/*         <Paper */}
-                {/*           key={index} */}
-                {/*           withBorder */}
-                {/*           p={"xs"} */}
-                {/*           radius={"md"} */}
-                {/*           className={`hover:border-[#E25DEE] cursor-pointer transition-all duration-300 transform hover:scale-110 ${ */}
-                {/*             typeof message !== "string" ? "bg-blue-100" : "" */}
-                {/*           }`} */}
-                {/*           style={{ */}
-                {/*             boxShadow: "0 6px 12px rgba(226, 93, 238, 0.3)", */}
-                {/*             transition: */}
-                {/*               "box-shadow 0.3s ease-in-out, transform 0.3s ease-in-out", */}
-                {/*           }} */}
-                {/*           onMouseEnter={(e) => { */}
-                {/*             e.currentTarget.style.boxShadow = */}
-                {/*               "0 12px 24px rgba(226, 93, 238, 0.5)"; */}
-                {/*             e.currentTarget.style.transform = */}
-                {/*               "translateY(-4px) scale(1.05)"; */}
-                {/*           }} */}
-                {/*           onMouseLeave={(e) => { */}
-                {/*             e.currentTarget.style.boxShadow = */}
-                {/*               "0 6px 12px rgba(226, 93, 238, 0.3)"; */}
-                {/*             e.currentTarget.style.transform = */}
-                {/*               "translateY(0) scale(1)"; */}
-                {/*           }} */}
-                {/*           onClick={(e) => { */}
-                {/*             if (e.currentTarget) { */}
-                {/*               e.currentTarget.style.backgroundColor = "#F3E8FF"; */}
-                {/*               setTimeout(() => { */}
-                {/*                 if (e.currentTarget) { */}
-                {/*                   e.currentTarget.style.backgroundColor = */}
-                {/*                     "white"; */}
-                {/*                 } */}
-                {/*               }, 300); */}
-                {/*             } */}
-                {/*             if (typeof message === "string") { */}
-                {/*               handleListClick(message); */}
-                {/*             } else if (typeof message === "object") { */}
-                {/*               //attach the strategy here. */}
-                {/*               handleListClick(message.transcript); */}
-                {/*             } */}
-                {/*           }} */}
-                {/*         > */}
-                {/*           <Flex */}
-                {/*             align={"center"} */}
-                {/*             gap={"xs"} */}
-                {/*             className="transition-transform duration-300 transform hover:translate-x-2" */}
-                {/*           > */}
-                {/*             <ThemeIcon */}
-                {/*               color={ */}
-                {/*                 typeof message === "string" ? "grape" : "blue" */}
-                {/*               } */}
-                {/*               size={"xl"} */}
-                {/*             > */}
-                {/*               <IconBrain size={"1.4rem"} /> */}
-                {/*             </ThemeIcon> */}
-                {/*             <Text */}
-                {/*               color={ */}
-                {/*                 typeof message === "string" ? "#E25DEE" : "blue" */}
-                {/*               } */}
-                {/*               fw={600} */}
-                {/*               size={"sm"} */}
-                {/*               className="transition-colors duration-300 hover:text-[#49494]" */}
-                {/*             > */}
-                {/*               {typeof message === "string" */}
-                {/*                 ? message */}
-                {/*                 : message.name} */}
-                {/*             </Text> */}
-                {/*             {typeof message !== "string" && ( */}
-                {/*               <ThemeIcon */}
-                {/*                 color="blue" */}
-                {/*                 size={"sm"} */}
-                {/*                 className="ml-auto" */}
-                {/*               > */}
-                {/*                 <IconChevronRight size={"1rem"} /> */}
-                {/*               </ThemeIcon> */}
-                {/*             )} */}
-                {/*           </Flex> */}
-                {/*         </Paper> */}
-                {/*       ))} */}
-                {/*     </div> */}
-                {/*   </Paper> */}
-                {/* </div> */}
-              </>
-            )}
-          </ScrollArea>
-        </div>
-        <div style={{ position: "relative" }}>
-          {/* <div */}
-          {/*   style={{ */}
-          {/*     width: "80%", */}
-          {/*     position: "absolute", */}
-          {/*     top: suggestion !== "" ? "-75px" : "0", */}
-          {/*     left: "50%", */}
-          {/*     transform: "translateX(-50%)", */}
-          {/*     overflow: "hidden", */}
-          {/*     height: suggestion !== "" ? "auto" : "0", */}
-          {/*     visibility: suggestion !== "" ? "visible" : "hidden", */}
-          {/*     zIndex: 1, */}
-          {/*   }} */}
-          {/* > */}
-          {/*   { */}
-          {/*     <div */}
-          {/*       id="slidingDiv" */}
-          {/*       style={{ */}
-          {/*         backgroundColor: suggestionHidden ? "transparent" : "#E25DEE", */}
-          {/*         padding: "13px", */}
-          {/*         borderRadius: "8px", */}
-          {/*         color: "white", */}
-          {/*         fontWeight: "bold", */}
-          {/*         textAlign: "center", */}
-          {/*         fontSize: "0.9rem", */}
-          {/*         animation: */}
-          {/*           suggestion !== "" ? "slideUp 0.5s forwards" : "none", */}
-          {/*       }} */}
-          {/*     > */}
-          {/*       {"💡 " + suggestion} */}
-          {/*       <span */}
-          {/*         style={{ */}
-          {/*           position: "absolute", */}
-          {/*           top: "5px", */}
-          {/*           right: "10px", */}
-          {/*           cursor: "pointer", */}
-          {/*           fontWeight: "bold", */}
-          {/*         }} */}
-          {/*         onClick={() => slideDown()} */}
-          {/*       > */}
-          {/*         X */}
-          {/*       </span> */}
-          {/*     </div> */}
-          {/*   } */}
-          {/* </div> */}
-          <Paper
-            p={"sm"}
-            withBorder
-            radius={"md"}
-            className="bg-[#f7f8fa]"
-            my={"lg"}
-            mx={"md"}
-            style={{
-              height: normalInputMode ? "200px" : "500px",
-              marginTop: normalInputMode ? "50px" : "-240px",
-              transition: "margin-top 0.3s ease",
-            }}
-          >
-            <style>
-              {`
+                              {uncollapsedCards[index] ? (
+                                <IconChevronDown
+                                  size={16}
+                                  className="transition-transform"
+                                />
+                              ) : (
+                                <IconChevronUp
+                                  size={16}
+                                  className="transition-transform"
+                                />
+                              )}
+                            </Flex>
+                          </Card.Section>
+                          {!uncollapsedCards[index] && (
+                            <Text size="xs" fw={400} color="gray" mt="xs">
+                              <div
+                                dangerouslySetInnerHTML={{
+                                  __html:
+                                    message.action_description?.replaceAll(
+                                      "\n",
+                                      "<br/><br/>"
+                                    ) || "",
+                                }}
+                              />
+                            </Text>
+                          )}
+                        </Card>
+                      )}
+                    </>
+                  );
+                })}
+              </Flex>
+              {/* <div className="absolute bottom-2 right-0 w-5/6 pr-4"> */}
+              {/*   <Paper */}
+              {/*     withBorder */}
+              {/*     p={"md"} */}
+              {/*     radius={"lg"} */}
+              {/*     className="bg-white shadow-lg" */}
+              {/*     style={{ */}
+              {/*       border: "2px solid #E25DEE", */}
+              {/*       boxShadow: "0 8px 16px rgba(226, 93, 238, 0.2)", */}
+              {/*     }} */}
+              {/*   > */}
+              {/*     <Text fw={700} size={"md"} color="#E25DEE" mb={"sm"}> */}
+              {/*       💡 Suggestions */}
+              {/*     </Text> */}
+              {/*     <div className="flex flex-col gap-2"> */}
+              {/*       {suggestedFirstMessage.map((message, index) => ( */}
+              {/*         <Paper */}
+              {/*           key={index} */}
+              {/*           withBorder */}
+              {/*           p={"xs"} */}
+              {/*           radius={"md"} */}
+              {/*           className={`hover:border-[#E25DEE] cursor-pointer transition-all duration-300 transform hover:scale-110 ${ */}
+              {/*             typeof message !== "string" ? "bg-blue-100" : "" */}
+              {/*           }`} */}
+              {/*           style={{ */}
+              {/*             boxShadow: "0 6px 12px rgba(226, 93, 238, 0.3)", */}
+              {/*             transition: */}
+              {/*               "box-shadow 0.3s ease-in-out, transform 0.3s ease-in-out", */}
+              {/*           }} */}
+              {/*           onMouseEnter={(e) => { */}
+              {/*             e.currentTarget.style.boxShadow = */}
+              {/*               "0 12px 24px rgba(226, 93, 238, 0.5)"; */}
+              {/*             e.currentTarget.style.transform = */}
+              {/*               "translateY(-4px) scale(1.05)"; */}
+              {/*           }} */}
+              {/*           onMouseLeave={(e) => { */}
+              {/*             e.currentTarget.style.boxShadow = */}
+              {/*               "0 6px 12px rgba(226, 93, 238, 0.3)"; */}
+              {/*             e.currentTarget.style.transform = */}
+              {/*               "translateY(0) scale(1)"; */}
+              {/*           }} */}
+              {/*           onClick={(e) => { */}
+              {/*             if (e.currentTarget) { */}
+              {/*               e.currentTarget.style.backgroundColor = "#F3E8FF"; */}
+              {/*               setTimeout(() => { */}
+              {/*                 if (e.currentTarget) { */}
+              {/*                   e.currentTarget.style.backgroundColor = */}
+              {/*                     "white"; */}
+              {/*                 } */}
+              {/*               }, 300); */}
+              {/*             } */}
+              {/*             if (typeof message === "string") { */}
+              {/*               handleListClick(message); */}
+              {/*             } else if (typeof message === "object") { */}
+              {/*               //attach the strategy here. */}
+              {/*               handleListClick(message.transcript); */}
+              {/*             } */}
+              {/*           }} */}
+              {/*         > */}
+              {/*           <Flex */}
+              {/*             align={"center"} */}
+              {/*             gap={"xs"} */}
+              {/*             className="transition-transform duration-300 transform hover:translate-x-2" */}
+              {/*           > */}
+              {/*             <ThemeIcon */}
+              {/*               color={ */}
+              {/*                 typeof message === "string" ? "grape" : "blue" */}
+              {/*               } */}
+              {/*               size={"xl"} */}
+              {/*             > */}
+              {/*               <IconBrain size={"1.4rem"} /> */}
+              {/*             </ThemeIcon> */}
+              {/*             <Text */}
+              {/*               color={ */}
+              {/*                 typeof message === "string" ? "#E25DEE" : "blue" */}
+              {/*               } */}
+              {/*               fw={600} */}
+              {/*               size={"sm"} */}
+              {/*               className="transition-colors duration-300 hover:text-[#49494]" */}
+              {/*             > */}
+              {/*               {typeof message === "string" */}
+              {/*                 ? message */}
+              {/*                 : message.name} */}
+              {/*             </Text> */}
+              {/*             {typeof message !== "string" && ( */}
+              {/*               <ThemeIcon */}
+              {/*                 color="blue" */}
+              {/*                 size={"sm"} */}
+              {/*                 className="ml-auto" */}
+              {/*               > */}
+              {/*                 <IconChevronRight size={"1rem"} /> */}
+              {/*               </ThemeIcon> */}
+              {/*             )} */}
+              {/*           </Flex> */}
+              {/*         </Paper> */}
+              {/*       ))} */}
+              {/*     </div> */}
+              {/*   </Paper> */}
+              {/* </div> */}
+            </>
+          )}
+        </ScrollArea>
+      </Box>
+      <Box style={{ position: "relative" }}>
+        {/* <div */}
+        {/*   style={{ */}
+        {/*     width: "80%", */}
+        {/*     position: "absolute", */}
+        {/*     top: suggestion !== "" ? "-75px" : "0", */}
+        {/*     left: "50%", */}
+        {/*     transform: "translateX(-50%)", */}
+        {/*     overflow: "hidden", */}
+        {/*     height: suggestion !== "" ? "auto" : "0", */}
+        {/*     visibility: suggestion !== "" ? "visible" : "hidden", */}
+        {/*     zIndex: 1, */}
+        {/*   }} */}
+        {/* > */}
+        {/*   { */}
+        {/*     <div */}
+        {/*       id="slidingDiv" */}
+        {/*       style={{ */}
+        {/*         backgroundColor: suggestionHidden ? "transparent" : "#E25DEE", */}
+        {/*         padding: "13px", */}
+        {/*         borderRadius: "8px", */}
+        {/*         color: "white", */}
+        {/*         fontWeight: "bold", */}
+        {/*         textAlign: "center", */}
+        {/*         fontSize: "0.9rem", */}
+        {/*         animation: */}
+        {/*           suggestion !== "" ? "slideUp 0.5s forwards" : "none", */}
+        {/*       }} */}
+        {/*     > */}
+        {/*       {"💡 " + suggestion} */}
+        {/*       <span */}
+        {/*         style={{ */}
+        {/*           position: "absolute", */}
+        {/*           top: "5px", */}
+        {/*           right: "10px", */}
+        {/*           cursor: "pointer", */}
+        {/*           fontWeight: "bold", */}
+        {/*         }} */}
+        {/*         onClick={() => slideDown()} */}
+        {/*       > */}
+        {/*         X */}
+        {/*       </span> */}
+        {/*     </div> */}
+        {/*   } */}
+        {/* </div> */}
+        <Paper
+          p={"sm"}
+          withBorder
+          radius={"md"}
+          className="bg-[#f7f8fa]"
+          my={"lg"}
+          mx={"md"}
+          style={{
+            height: normalInputMode ? "200px" : "500px",
+            marginTop: normalInputMode ? "50px" : "-240px",
+            transition: "margin-top 0.3s ease",
+          }}
+        >
+          <style>
+            {`
             @keyframes slideUp {
               from {
                 transform: translateY(100%);
@@ -4577,46 +4579,46 @@ const SegmentChat = (props: any) => {
               }
             }
           `}
-            </style>
-            <Textarea
-              ref={textareaRef}
-              value={prompt}
-              placeholder={sendAsSelix ? "Chat To User..." : "Chat with AI..."}
-              onKeyDown={handleKeyDown}
-              onChange={(e) => {
-                setPrompt(e.target.value);
-                const textarea = e.target;
-                textarea.style.height = normalInputMode ? "500px" : "500px";
-              }}
-              variant="unstyled"
-              inputContainer={(children) => (
-                <div style={{ minHeight: "0px", cursor: "default" }}>
-                  {children}
-                </div>
-              )}
-              maxRows={10}
-              style={{
-                height: normalInputMode ? "70%" : "87%",
-                resize: "none",
-                overflow: "hidden",
-                cursor: "default",
-                fontSize: "1rem",
-                padding: "10px",
-                border:
-                  prompt.trim().length === 0
-                    ? "2px solid #D8BFD8"
-                    : "1px solid #ccc",
-                borderRadius: "8px",
-                boxShadow:
-                  prompt.trim().length === 0 ? "0 0 10px #D8BFD8" : "none",
-                animation:
-                  prompt.trim().length === 0
-                    ? "glow 1.5s infinite alternate"
-                    : "none",
-              }}
-            />
-            <style>
-              {`
+          </style>
+          <Textarea
+            ref={textareaRef}
+            value={prompt}
+            placeholder={sendAsSelix ? "Chat To User..." : "Chat with AI..."}
+            onKeyDown={handleKeyDown}
+            onChange={(e) => {
+              setPrompt(e.target.value);
+              const textarea = e.target;
+              textarea.style.height = normalInputMode ? "500px" : "500px";
+            }}
+            variant="unstyled"
+            inputContainer={(children) => (
+              <div style={{ minHeight: "0px", cursor: "default" }}>
+                {children}
+              </div>
+            )}
+            maxRows={10}
+            style={{
+              height: normalInputMode ? "70%" : "87%",
+              resize: "none",
+              overflow: "hidden",
+              cursor: "default",
+              fontSize: "1rem",
+              padding: "10px",
+              border:
+                prompt.trim().length === 0
+                  ? "2px solid #D8BFD8"
+                  : "1px solid #ccc",
+              borderRadius: "8px",
+              boxShadow:
+                prompt.trim().length === 0 ? "0 0 10px #D8BFD8" : "none",
+              animation:
+                prompt.trim().length === 0
+                  ? "glow 1.5s infinite alternate"
+                  : "none",
+            }}
+          />
+          <style>
+            {`
               @keyframes glow {
                 from {
                   box-shadow: 0 0 5px #D8BFD8;
@@ -4626,432 +4628,424 @@ const SegmentChat = (props: any) => {
                 }
               }
             `}
-            </style>
-            <Flex justify={"space-between"} mt={"sm"} align={"center"}>
-              <Flex gap={"sm"}>
+          </style>
+          <Flex justify={"space-between"} mt={"sm"} align={"center"}>
+            <Flex gap={"sm"}>
+              <ActionIcon
+                variant="outline"
+                color="gray"
+                radius={"xl"}
+                size={"sm"}
+                onClick={() => {
+                  textareaRef.current?.focus();
+                  if (textareaRef.current) {
+                    textareaRef.current.style.height = "auto";
+                  }
+                  setNormalInputMode(!normalInputMode);
+                }}
+              >
+                {normalInputMode ? (
+                  <IconArrowsMaximize size={"1rem"} />
+                ) : (
+                  <IconArrowsMinimize size={"1rem"} />
+                )}
+              </ActionIcon>
+              {/* <ActionIcon variant="outline" color="gray" radius={"xl"} size={"sm"}>
+                <IconPlus size={"1rem"} />
+              </ActionIcon> */}
+              {!attachedFile ? (
                 <ActionIcon
+                  ml={"xl"}
                   variant="outline"
                   color="gray"
                   radius={"xl"}
                   size={"sm"}
                   onClick={() => {
-                    textareaRef.current?.focus();
-                    if (textareaRef.current) {
-                      textareaRef.current.style.height = "auto";
-                    }
-                    setNormalInputMode(!normalInputMode);
+                    const fileInput = document.createElement("input");
+                    fileInput.type = "file";
+                    fileInput.onchange = (e) => {
+                      const file = (e.target as HTMLInputElement).files?.[0];
+                      if (file) {
+                        console.log("File selected:", file.name);
+                        dropzoneRef.current?.handleDrop(file);
+                      }
+                    };
+                    fileInput.click();
                   }}
                 >
-                  {normalInputMode ? (
-                    <IconArrowsMaximize size={"1rem"} />
-                  ) : (
-                    <IconArrowsMinimize size={"1rem"} />
-                  )}
+                  <Button ml="xl" color="grape" size="xs">
+                    {"Add File"}
+                    <IconPlus size={"1rem"} />
+                  </Button>
                 </ActionIcon>
-                {/* <ActionIcon variant="outline" color="gray" radius={"xl"} size={"sm"}>
-                <IconPlus size={"1rem"} />
-              </ActionIcon> */}
-                {!attachedFile ? (
+              ) : (
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    padding: "6px 10px",
+                    borderRadius: "6px",
+                    backgroundColor: "#e9ecef",
+                    color: "#495057",
+                    fontSize: "0.875rem",
+                    whiteSpace: "nowrap",
+                    border: "2px solid #adb5bd",
+                    boxShadow: "0 0 5px rgba(0, 0, 0, 0.1)",
+                  }}
+                >
+                  <IconFile
+                    size={"1rem"}
+                    style={{ marginRight: "8px", color: "#6c757d" }}
+                  />
+                  <Text fw={500} size={"xs"} style={{ marginRight: "8px" }}>
+                    {attachedFile.name.length > 30
+                      ? attachedFile.name.substring(0, 30) + "..."
+                      : attachedFile.name}
+                  </Text>
                   <ActionIcon
-                    ml={"xl"}
                     variant="outline"
                     color="gray"
                     radius={"xl"}
-                    size={"sm"}
-                    onClick={() => {
-                      const fileInput = document.createElement("input");
-                      fileInput.type = "file";
-                      fileInput.onchange = (e) => {
-                        const file = (e.target as HTMLInputElement).files?.[0];
-                        if (file) {
-                          console.log("File selected:", file.name);
-                          dropzoneRef.current?.handleDrop(file);
-                        }
-                      };
-                      fileInput.click();
+                    size={"xs"}
+                    onClick={() => setAttachedFile(null)}
+                    sx={{
+                      transition: "transform 0.2s ease, box-shadow 0.2s ease",
+                      "&:hover": {
+                        transform: "scale(1.1)",
+                        boxShadow: "0 0 10px rgba(0, 0, 0, 0.2)",
+                      },
                     }}
                   >
-                    <Button ml="xl" color="grape" size="xs">
-                      {"Add File"}
-                      <IconPlus size={"1rem"} />
-                    </Button>
+                    <IconX size={"1rem"} />
                   </ActionIcon>
-                ) : (
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      padding: "6px 10px",
-                      borderRadius: "6px",
-                      backgroundColor: "#e9ecef",
-                      color: "#495057",
-                      fontSize: "0.875rem",
-                      whiteSpace: "nowrap",
-                      border: "2px solid #adb5bd",
-                      boxShadow: "0 0 5px rgba(0, 0, 0, 0.1)",
-                    }}
-                  >
-                    <IconFile
-                      size={"1rem"}
-                      style={{ marginRight: "8px", color: "#6c757d" }}
-                    />
-                    <Text fw={500} size={"xs"} style={{ marginRight: "8px" }}>
-                      {attachedFile.name.length > 30
-                        ? attachedFile.name.substring(0, 30) + "..."
-                        : attachedFile.name}
-                    </Text>
-                    <ActionIcon
-                      variant="outline"
-                      color="gray"
-                      radius={"xl"}
-                      size={"xs"}
-                      onClick={() => setAttachedFile(null)}
-                      sx={{
-                        transition: "transform 0.2s ease, box-shadow 0.2s ease",
-                        "&:hover": {
-                          transform: "scale(1.1)",
-                          boxShadow: "0 0 10px rgba(0, 0, 0, 0.2)",
-                        },
-                      }}
-                    >
-                      <IconX size={"1rem"} />
-                    </ActionIcon>
-                  </div>
-                )}
-              </Flex>
-              <Flex>
-                <DeepGram
-                  recording={recording}
-                  setRecording={setRecording}
-                  onTranscriptionChanged={(text) => {
-                    setPrompt((prevPrompt: string) => {
-                      const newPrompt = prevPrompt + text;
-                      promptRef.current = newPrompt;
-                      setTimeout(() => {
-                        const textarea = document.querySelector("textarea");
-                        if (textarea) {
-                          textarea.scrollTop = textarea.scrollHeight;
-                        }
-                      }, 0);
-                      return newPrompt;
-                    });
-                  }}
-                />
-                <Button
-                  size={"xs"}
-                  disabled={prompt.trim().length === 0}
-                  variant="filled"
-                  className="bg-[#E25DEE] hover:bg-[#E25DEE]/80"
-                  onClick={() => {
-                    handleSubmit(
-                      undefined,
-                      undefined,
-                      sendAsSelix,
-                      sendSlack,
-                      sendEmail,
-                      scheduleDay
-                    );
-                    setRecording(false);
-                    setScheduleDay(undefined);
-                    setIntendedTaskChange(undefined);
-                    props.setAttachedInternalTask(undefined);
-                  }}
-                  // leftIcon={<IconSend size={"1rem"} />}
-                >
-                  {" "}
-                  {"Send"}
-                  <Flex ml={"xs"} align="center" gap="1px">
-                    <Kbd size={"xs"} style={{ color: "purple" }}>
-                      ⌘
-                    </Kbd>
-                    {"+"}
-                    <Kbd size={"xs"} style={{ color: "purple" }}>
-                      ↩
-                    </Kbd>
-                  </Flex>
-                </Button>
-              </Flex>
+                </div>
+              )}
             </Flex>
-          </Paper>
-          <Flex align="center" gap="0.5rem">
-            <ActionIcon
-              size="sm"
-              onClick={() => {
-                const url = `/selix_debugger?session_id=${sessionId}`;
-                window.open(url, "_blank");
-              }}
-            >
-              <IconSettings size={"1rem"} />
-            </ActionIcon>
-            {isInternal && (
-              <>
-                <Switch
-                  size="sm"
-                  color="grape"
-                  checked={sendAsSelix}
-                  onChange={() => {
-                    const newSendAsSelix = !sendAsSelix;
-                    setSendAsSelix(newSendAsSelix);
-                    if (!newSendAsSelix) {
-                      setSendEmail(false);
-                      setSendSlack(false);
-                    }
-                  }}
-                  label="As Selix"
-                  labelPosition="right"
-                  styles={{
-                    label: { color: "grape" },
-                  }}
-                />
-                {sendAsSelix && (
-                  <>
-                    <Checkbox
-                      checked={sendEmail}
-                      onChange={() => setSendEmail(!sendEmail)}
-                      label={<IconMail stroke={2.5} color="black" />}
-                      size="sm"
-                      mr="xs"
-                      mt="xs"
-                      color="grape"
-                    />
-                    <Checkbox
-                      checked={sendSlack}
-                      onChange={() => setSendSlack(!sendSlack)}
-                      label={
-                        <img
-                          src={SlackLogo}
-                          alt="slack"
-                          width={20}
-                          height={20}
-                        />
+            <Flex>
+              <DeepGram
+                recording={recording}
+                setRecording={setRecording}
+                onTranscriptionChanged={(text) => {
+                  setPrompt((prevPrompt: string) => {
+                    const newPrompt = prevPrompt + text;
+                    promptRef.current = newPrompt;
+                    setTimeout(() => {
+                      const textarea = document.querySelector("textarea");
+                      if (textarea) {
+                        textarea.scrollTop = textarea.scrollHeight;
                       }
-                      size="sm"
-                      color="grape"
-                    />
-                    <Popover
-                      position="bottom"
-                      withArrow
-                      shadow="md"
-                      trapFocus
-                      opened={showSchedulePopup}
-                    >
-                      <Popover.Target>
+                    }, 0);
+                    return newPrompt;
+                  });
+                }}
+              />
+              <Button
+                size={"xs"}
+                disabled={prompt.trim().length === 0}
+                variant="filled"
+                className="bg-[#E25DEE] hover:bg-[#E25DEE]/80"
+                onClick={() => {
+                  handleSubmit(
+                    undefined,
+                    undefined,
+                    sendAsSelix,
+                    sendSlack,
+                    sendEmail,
+                    scheduleDay
+                  );
+                  setRecording(false);
+                  setScheduleDay(undefined);
+                  setIntendedTaskChange(undefined);
+                  props.setAttachedInternalTask(undefined);
+                }}
+                // leftIcon={<IconSend size={"1rem"} />}
+              >
+                {" "}
+                {"Send"}
+                <Flex ml={"xs"} align="center" gap="1px">
+                  <Kbd size={"xs"} style={{ color: "purple" }}>
+                    ⌘
+                  </Kbd>
+                  {"+"}
+                  <Kbd size={"xs"} style={{ color: "purple" }}>
+                    ↩
+                  </Kbd>
+                </Flex>
+              </Button>
+            </Flex>
+          </Flex>
+        </Paper>
+        <Flex align="center" gap="0.5rem">
+          <ActionIcon
+            size="sm"
+            onClick={() => {
+              const url = `/selix_debugger?session_id=${sessionId}`;
+              window.open(url, "_blank");
+            }}
+          >
+            <IconSettings size={"1rem"} />
+          </ActionIcon>
+          {isInternal && (
+            <>
+              <Switch
+                size="sm"
+                color="grape"
+                checked={sendAsSelix}
+                onChange={() => {
+                  const newSendAsSelix = !sendAsSelix;
+                  setSendAsSelix(newSendAsSelix);
+                  if (!newSendAsSelix) {
+                    setSendEmail(false);
+                    setSendSlack(false);
+                  }
+                }}
+                label="As Selix"
+                labelPosition="right"
+                styles={{
+                  label: { color: "grape" },
+                }}
+              />
+              {sendAsSelix && (
+                <>
+                  <Checkbox
+                    checked={sendEmail}
+                    onChange={() => setSendEmail(!sendEmail)}
+                    label={<IconMail stroke={2.5} color="black" />}
+                    size="sm"
+                    mr="xs"
+                    mt="xs"
+                    color="grape"
+                  />
+                  <Checkbox
+                    checked={sendSlack}
+                    onChange={() => setSendSlack(!sendSlack)}
+                    label={
+                      <img src={SlackLogo} alt="slack" width={20} height={20} />
+                    }
+                    size="sm"
+                    color="grape"
+                  />
+                  <Popover
+                    position="bottom"
+                    withArrow
+                    shadow="md"
+                    trapFocus
+                    opened={showSchedulePopup}
+                  >
+                    <Popover.Target>
+                      <Tooltip
+                        label="Schedule a send time into the future"
+                        withArrow
+                        withinPortal
+                      >
+                        <Flex>
+                          <Button
+                            onClick={() => setShowSchedulePopup((v) => !v)}
+                            size="xs"
+                          >
+                            <IconClock24 size={"1rem"} />
+                          </Button>
+                        </Flex>
+                      </Tooltip>
+                    </Popover.Target>
+
+                    <Popover.Dropdown>
+                      <Calendar
+                        placeholder={"Select a date"}
+                        minDate={moment(new Date()).add(0, "days").toDate()}
+                        getDayProps={(date) => ({
+                          selected: moment(scheduleDay).isSame(date, "day"),
+                          onClick: () => {
+                            // Preserve the time
+                            const hour = moment(scheduleDay).hour();
+                            const minute = moment(scheduleDay).minute();
+                            const newDate = moment(date)
+                              .set("hour", hour)
+                              .set("minute", minute)
+                              .toDate();
+                            setScheduleDay(newDate);
+                          },
+                        })}
+                        onPointerEnterCapture={() => {}}
+                        onPointerLeaveCapture={() => {}}
+                      />
+                      <Flex
+                        mt="xs"
+                        direction="row"
+                        justify={"space-between"}
+                        align="flex-end"
+                      >
+                        <TimeInput
+                          w="100%"
+                          label="Custom Time"
+                          size="sm"
+                          value={moment(scheduleDay).format("HH:mm")}
+                          onChange={(event) => {
+                            const value = event.currentTarget.value; // Format is HH:MM
+                            const hour = parseInt(value.split(":")[0]);
+                            const minute = parseInt(value.split(":")[1]);
+                            const newDate = moment(scheduleDay)
+                              .set("hour", hour)
+                              .set("minute", minute)
+                              .toDate();
+                            setScheduleDay(newDate);
+                          }}
+                        />
                         <Tooltip
-                          label="Schedule a send time into the future"
+                          label="Schedule for now"
                           withArrow
                           withinPortal
                         >
                           <Flex>
                             <Button
-                              onClick={() => setShowSchedulePopup((v) => !v)}
                               size="xs"
+                              mb="xs"
+                              ml="sm"
+                              variant="transparent"
+                              color="red"
+                              onClick={() => {
+                                setShowSchedulePopup(false);
+                                setScheduleDay(undefined);
+                              }}
                             >
-                              <IconClock24 size={"1rem"} />
+                              <IconX size="1rem" />
                             </Button>
                           </Flex>
                         </Tooltip>
-                      </Popover.Target>
-
-                      <Popover.Dropdown>
-                        <Calendar
-                          placeholder={"Select a date"}
-                          minDate={moment(new Date()).add(0, "days").toDate()}
-                          getDayProps={(date) => ({
-                            selected: moment(scheduleDay).isSame(date, "day"),
-                            onClick: () => {
-                              // Preserve the time
-                              const hour = moment(scheduleDay).hour();
-                              const minute = moment(scheduleDay).minute();
-                              const newDate = moment(date)
-                                .set("hour", hour)
-                                .set("minute", minute)
-                                .toDate();
-                              setScheduleDay(newDate);
-                            },
-                          })}
-                          onPointerEnterCapture={() => {}}
-                          onPointerLeaveCapture={() => {}}
-                        />
-                        <Flex
-                          mt="xs"
-                          direction="row"
-                          justify={"space-between"}
-                          align="flex-end"
+                      </Flex>
+                    </Popover.Dropdown>
+                  </Popover>
+                  {!attachedInternalTask ? (
+                    <Droppable droppableId="droppable-area">
+                      {(provided, snapshot) => (
+                        <div
+                          ref={provided.innerRef}
+                          style={{
+                            border: snapshot.isDraggingOver
+                              ? "1px solid #4caf50"
+                              : "1px dashed #ccc",
+                            padding: "10px",
+                            marginLeft: "5px",
+                            height: "10px",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            backgroundColor: snapshot.isDraggingOver
+                              ? "#f0fff0"
+                              : "transparent",
+                            overflow: "hidden", // Changed from "auto" to "hidden" to prevent expansion
+                          }}
+                          onDragEnter={(event) => {
+                            console.log("Drag Enter event:", event);
+                          }}
+                          onDragOver={(event) => {
+                            console.log("Drag Over event:", event);
+                            event.preventDefault();
+                          }}
+                          onDragLeave={(event) => {
+                            console.log("Drag Leave event:", event);
+                          }}
+                          onDrop={(event) => {
+                            console.log("Drop event:", event);
+                            event.preventDefault();
+                            const data = event.dataTransfer.getData("text");
+                            console.log("Dropped item:", data);
+                            alert("Dropped item: " + data);
+                          }}
+                          onMouseEnter={(event) => {
+                            console.log("Mouse entered droppable area");
+                          }}
+                          onMouseLeave={() => {
+                            console.log("Mouse left droppable area");
+                          }}
                         >
-                          <TimeInput
-                            w="100%"
-                            label="Custom Time"
-                            size="sm"
-                            value={moment(scheduleDay).format("HH:mm")}
-                            onChange={(event) => {
-                              const value = event.currentTarget.value; // Format is HH:MM
-                              const hour = parseInt(value.split(":")[0]);
-                              const minute = parseInt(value.split(":")[1]);
-                              const newDate = moment(scheduleDay)
-                                .set("hour", hour)
-                                .set("minute", minute)
-                                .toDate();
-                              setScheduleDay(newDate);
-                            }}
-                          />
                           <Tooltip
-                            label="Schedule for now"
+                            label="Drag task here to attach"
                             withArrow
                             withinPortal
                           >
                             <Flex>
-                              <Button
-                                size="xs"
-                                mb="xs"
-                                ml="sm"
-                                variant="transparent"
-                                color="red"
-                                onClick={() => {
-                                  setShowSchedulePopup(false);
-                                  setScheduleDay(undefined);
-                                }}
-                              >
-                                <IconX size="1rem" />
-                              </Button>
+                              <IconChecklist size="1rem" />
+                              {provided.placeholder}
                             </Flex>
                           </Tooltip>
-                        </Flex>
-                      </Popover.Dropdown>
-                    </Popover>
-                    {!attachedInternalTask ? (
-                      <Droppable droppableId="droppable-area">
-                        {(provided, snapshot) => (
-                          <div
-                            ref={provided.innerRef}
-                            style={{
-                              border: snapshot.isDraggingOver
-                                ? "1px solid #4caf50"
-                                : "1px dashed #ccc",
-                              padding: "10px",
-                              marginLeft: "5px",
-                              height: "10px",
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              backgroundColor: snapshot.isDraggingOver
-                                ? "#f0fff0"
-                                : "transparent",
-                              overflow: "hidden", // Changed from "auto" to "hidden" to prevent expansion
-                            }}
-                            onDragEnter={(event) => {
-                              console.log("Drag Enter event:", event);
-                            }}
-                            onDragOver={(event) => {
-                              console.log("Drag Over event:", event);
-                              event.preventDefault();
-                            }}
-                            onDragLeave={(event) => {
-                              console.log("Drag Leave event:", event);
-                            }}
-                            onDrop={(event) => {
-                              console.log("Drop event:", event);
-                              event.preventDefault();
-                              const data = event.dataTransfer.getData("text");
-                              console.log("Dropped item:", data);
-                              alert("Dropped item: " + data);
-                            }}
-                            onMouseEnter={(event) => {
-                              console.log("Mouse entered droppable area");
-                            }}
-                            onMouseLeave={() => {
-                              console.log("Mouse left droppable area");
-                            }}
-                          >
-                            <Tooltip
-                              label="Drag task here to attach"
-                              withArrow
-                              withinPortal
-                            >
-                              <Flex>
-                                <IconChecklist size="1rem" />
-                                {provided.placeholder}
-                              </Flex>
-                            </Tooltip>
-                          </div>
-                        )}
-                      </Droppable>
-                    ) : (
-                      <div style={{ position: "relative" }}>
-                        <Text
-                          style={{
-                            fontSize: "0.8rem",
-                            fontWeight: "bold",
-                            color: "#4caf50",
-                            padding: "0px",
-                            border: "1px solid #ccc",
-                            borderRadius: "5px",
-                            marginRight: "14px",
-                            backgroundColor: "#f9f9f9",
-                            boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
-                            textAlign: "center",
-                          }}
-                        >
-                          {attachedInternalTask.title}
-                        </Text>
-                        <select
-                          style={{
-                            fontSize: "0.8rem",
-                            marginTop: "5px",
-                            border: "1px solid #ccc",
-                            borderRadius: "5px",
-                            padding: "2px",
-                            backgroundColor: "#f9f9f9",
-                            width: "100%",
-                          }}
-                          onChange={(e) => {
-                            setIntendedTaskChange(e.target.value);
-                          }}
-                        >
-                          <option value="QUEUED">New Status: Queued</option>
-                          <option value="IN_PROGRESS">
-                            New Status: In Progress
-                          </option>
-                          <option value="IN_PROGRESS_REVIEW_NEEDED">
-                            New Status: In Progress Review Needed
-                          </option>
-                          <option value="COMPLETE">New Status: Complete</option>
-                          <option value="CANCELLED">
-                            New Status: Cancelled
-                          </option>
-                          <option value="BLOCKED">New Status: Blocked</option>
-                        </select>
-                        <div
-                          style={{
-                            position: "absolute",
-                            top: "0",
-                            right: "0",
-                            cursor: "pointer",
-                            color: "green",
-                            fontSize: "0.8rem",
-                            transition: "transform 0.2s ease-in-out",
-                          }}
-                          onMouseEnter={(e) => {
-                            e.currentTarget.style.transform = "scale(1.2)";
-                          }}
-                          onMouseLeave={(e) => {
-                            e.currentTarget.style.transform = "scale(1)";
-                          }}
-                          onClick={(e) => {
-                            props.setAttachedInternalTask(undefined);
-                          }}
-                        >
-                          ✖
                         </div>
+                      )}
+                    </Droppable>
+                  ) : (
+                    <div style={{ position: "relative" }}>
+                      <Text
+                        style={{
+                          fontSize: "0.8rem",
+                          fontWeight: "bold",
+                          color: "#4caf50",
+                          padding: "0px",
+                          border: "1px solid #ccc",
+                          borderRadius: "5px",
+                          marginRight: "14px",
+                          backgroundColor: "#f9f9f9",
+                          boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+                          textAlign: "center",
+                        }}
+                      >
+                        {attachedInternalTask.title}
+                      </Text>
+                      <select
+                        style={{
+                          fontSize: "0.8rem",
+                          marginTop: "5px",
+                          border: "1px solid #ccc",
+                          borderRadius: "5px",
+                          padding: "2px",
+                          backgroundColor: "#f9f9f9",
+                          width: "100%",
+                        }}
+                        onChange={(e) => {
+                          setIntendedTaskChange(e.target.value);
+                        }}
+                      >
+                        <option value="QUEUED">New Status: Queued</option>
+                        <option value="IN_PROGRESS">
+                          New Status: In Progress
+                        </option>
+                        <option value="IN_PROGRESS_REVIEW_NEEDED">
+                          New Status: In Progress Review Needed
+                        </option>
+                        <option value="COMPLETE">New Status: Complete</option>
+                        <option value="CANCELLED">New Status: Cancelled</option>
+                        <option value="BLOCKED">New Status: Blocked</option>
+                      </select>
+                      <div
+                        style={{
+                          position: "absolute",
+                          top: "0",
+                          right: "0",
+                          cursor: "pointer",
+                          color: "green",
+                          fontSize: "0.8rem",
+                          transition: "transform 0.2s ease-in-out",
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.transform = "scale(1.2)";
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.transform = "scale(1)";
+                        }}
+                        onClick={(e) => {
+                          props.setAttachedInternalTask(undefined);
+                        }}
+                      >
+                        ✖
                       </div>
-                    )}
-                  </>
-                )}
-              </>
-            )}
-          </Flex>
-        </div>
-      </Paper>
-    </>
+                    </div>
+                  )}
+                </>
+              )}
+            </>
+          )}
+        </Flex>
+      </Box>
+    </Paper>
   );
 };
 
@@ -5123,11 +5117,15 @@ const SelixControlCenter = ({
     }
   }, [{ ...threads }]);
 
+  console.log("control center chatfullsize; ", chatfullSize);
+
   return (
     <Paper
       withBorder
       shadow="sm"
-      w={!chatfullSize ? "52%" : "100%"}
+      sx={{
+        maxWidth: chatfullSize ? "65%" : "20%",
+      }}
       radius={"md"}
       h={"90vh"}
     >
@@ -6057,7 +6055,12 @@ export const PlannerComponent = ({
   console.log("selected persona", selectedPersona);
 
   return (
-    <Paper p={"sm"} radius={"sm"} h={"90%"}>
+    <Paper
+      p={"sm"}
+      radius={"sm"}
+      h={"90%"}
+      style={{ maxWidth: "100%", overflow: "hidden" }}
+    >
       <Flex direction={"column"} gap={"4px"}>
         <Paper
           bg={"#fefafe"}
@@ -6734,6 +6737,7 @@ export const PlannerComponent = ({
                                   </Flex>
                                 </Flex>
                                 <Collapse in={openedTaskIndex === index}>
+                                <Box>
                                   <Text p={"xs"} mt={"sm"} size="xs">
                                     {editingTask === index ? (
                                       <RichTextArea
@@ -6775,6 +6779,7 @@ export const PlannerComponent = ({
                                         setOpenedTaskIndex={setOpenedTaskIndex}
                                       />
                                     )}
+                                    </Box>
                                 </Collapse>
                               </Paper>
                             )}

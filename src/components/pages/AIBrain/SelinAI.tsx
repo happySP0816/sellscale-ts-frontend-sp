@@ -709,6 +709,8 @@ export default function SelinAI() {
         // setPrompt("");
       }
     }
+
+    queryClient.invalidateQueries(['selix-session', currentSessionId])
   };
 
   const handleEditStrategy = async (prompt: string) => {

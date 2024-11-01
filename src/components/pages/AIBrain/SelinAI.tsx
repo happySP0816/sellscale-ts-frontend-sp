@@ -3914,7 +3914,6 @@ const SegmentChat = (props: any) => {
             <Text fw={600}>Chat with Selix</Text>
           </Flex>
           <Popover width={360} shadow={"md"} position={"left"} withinPortal>
-            <LoadingOverlay visible={isLoading} zIndex={2} />
             <Popover.Target>
               <Badge color="gray" variant="outline" radius={4} ml="auto">
                 {(() => {
@@ -3940,6 +3939,7 @@ const SegmentChat = (props: any) => {
             </Popover.Target>
             <Popover.Dropdown>
               <Flex align={"center"} direction={"column"}>
+                <LoadingOverlay visible={isLoading} zIndex={2} />
                 <Flex
                   justify="space-between"
                   align="center"

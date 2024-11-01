@@ -2013,7 +2013,7 @@ export default function SelinAI() {
                                           }
                                         >
                                           <Badge color="pink" variant="outline">
-                                            ��
+                                            🧑
                                           </Badge>
                                         </Text>
                                       </Popover.Target>

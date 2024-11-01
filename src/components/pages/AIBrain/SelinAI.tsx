@@ -710,7 +710,7 @@ export default function SelinAI() {
       }
     }
 
-    queryClient.invalidateQueries(['selix-session', currentSessionId])
+    queryClient.invalidateQueries(["selix-session", currentSessionId]);
   };
 
   const handleEditStrategy = async (prompt: string) => {
@@ -4778,7 +4778,8 @@ const SegmentChat = (props: any) => {
           <Flex style={{ margin: "8px 0px 8px 0px", width: "100%" }}>
             {
               // Dynamic buttons
-              props.memory.session_mode === "campaign_builder" &&
+              props.memory.session_mode &&
+                props.memory.session_mode === "campaign_builder" &&
                 messages &&
                 messages.length > 5 &&
                 props.tasks &&
@@ -4802,35 +4803,39 @@ const SegmentChat = (props: any) => {
             }
             {
               // Dynamic buttons exit ingestion
-              props.memory.session_mode === "ingestion_mode" && (
-                <Button
-                  size={"xs"}
-                  onClick={() => {
-                    handleSubmit &&
-                      handleSubmit(
-                        undefined,
-                        "Let's exit out of ingestion mode."
-                      );
-                  }}
-                  color={"grape"}
-                  style={{ width: "100%" }}
-                >
-                  💡Exit Ingestion Mode
-                </Button>
-              )
+              props.memory.session_mode &&
+                props.memory.session_mode === "ingestion_mode" && (
+                  <Button
+                    size={"xs"}
+                    onClick={() => {
+                      handleSubmit &&
+                        handleSubmit(
+                          undefined,
+                          "Let's exit out of ingestion mode."
+                        );
+                    }}
+                    color={"grape"}
+                    style={{ width: "100%" }}
+                  >
+                    💡Exit Ingestion Mode
+                  </Button>
+                )
             }
           </Flex>
         </Paper>
         <Flex align="center" gap="0.5rem">
-          <ActionIcon
-            size="sm"
-            onClick={() => {
-              const url = `/selix_debugger?session_id=${sessionId}`;
-              window.open(url, "_blank");
-            }}
-          >
-            <IconSettings size={"1rem"} />
-          </ActionIcon>
+          {isInternal && (
+            <ActionIcon
+              size="sm"
+              onClick={() => {
+                const url = `/selix_debugger?session_id=${sessionId}`;
+                window.open(url, "_blank");
+              }}
+            >
+              <IconSettings size={"1rem"} />
+            </ActionIcon>
+          )}
+
           {isInternal && (
             <>
               <Switch

@@ -4014,7 +4014,7 @@ const SegmentChat = (props: any) => {
         </Popover>
       </Flex>
       <Divider bg="gray" />
-      <Box style={{ position: "relative", height: "48vh" }}>
+      <Box style={{ height: "48vh" }}>
         <ScrollArea
           h={"53vh"}
           viewportRef={viewport}
@@ -4503,7 +4503,77 @@ const SegmentChat = (props: any) => {
           )}
         </ScrollArea>
       </Box>
-      <Box style={{ position: "relative" }}>
+      <Box style={{ position: "relative", marginTop: "75px" }}>
+        <Flex style={{ position: "absolute", top: "-35px", left: "30%" }}>
+          {
+            // Dynamic buttons
+            props.memory?.session_mode &&
+              props.memory.session_mode === "campaign_builder" &&
+              messages &&
+              props.tasks &&
+              (props.tasks.length === 0 ||
+                (props.tasks.length === 1 && !props.tasks[0].id)) && (
+                <Button
+                  onClick={() => {
+                    handleSubmit &&
+                      handleSubmit(
+                        undefined,
+                        "Let's go ahead and create the task plan."
+                      );
+                  }}
+                  size={"xs"}
+                  color={"blue"}
+                  style={{ width: "100%" }}
+                >
+                  💡Create Task Plan
+                </Button>
+              )
+          }
+          {
+            // Dynamic buttons
+            props.memory?.session_mode &&
+              props.memory.session_mode === "campaign_builder" &&
+              messages &&
+              props.tasks &&
+              props.tasks.length === 1 &&
+              props.tasks[0].id && (
+                <Button
+                  onClick={() => {
+                    handleSubmit &&
+                      handleSubmit(
+                        undefined,
+                        "Let's go ahead and execute the task plan and create the task lists."
+                      );
+                  }}
+                  size={"xs"}
+                  color={"blue"}
+                  style={{ width: "100%" }}
+                >
+                  💡Execute Task Plan
+                </Button>
+              )
+          }
+          {
+            // Dynamic buttons exit ingestion
+            props.memory?.session_mode &&
+              props.memory.session_mode === "ingestion_mode" && (
+                <Button
+                  size={"xs"}
+                  onClick={() => {
+                    handleSubmit &&
+                      handleSubmit(
+                        undefined,
+                        "Let's exit out of ingestion mode."
+                      );
+                  }}
+                  color={"red"}
+                  style={{ width: "100%" }}
+                >
+                  ✍️ Exit Ingestion Mode
+                </Button>
+              )
+          }
+        </Flex>
         {/* <div */}
         {/*   style={{ */}
         {/*     width: "80%", */}
@@ -4549,11 +4619,9 @@ const SegmentChat = (props: any) => {
         {/*   } */}
         {/* </div> */}
         <Paper
-          p={"sm"}
           withBorder
           radius={"md"}
           className="bg-[#f7f8fa]"
-          my={"lg"}
           mx={"md"}
           style={{
             height: normalInputMode ? "250px" : "550px",
@@ -4774,53 +4842,6 @@ const SegmentChat = (props: any) => {
                 </Flex>
               </Button>
             </Flex>
-          </Flex>
-          <Flex style={{ margin: "8px 0px 8px 0px", width: "100%" }}>
-            {
-              // Dynamic buttons
-              props.memory?.session_mode &&
-                props.memory.session_mode === "campaign_builder" &&
-                messages &&
-                messages.length > 5 &&
-                props.tasks &&
-                (props.tasks.length === 0 ||
-                  (props.tasks.length === 1 && !props.tasks[0].id)) && (
-                  <Button
-                    onClick={() => {
-                      handleSubmit &&
-                        handleSubmit(
-                          undefined,
-                          "Let's go ahead and create the task plan."
-                        );
-                    }}
-                    size={"xs"}
-                    color={"grape"}
-                    style={{ width: "100%" }}
-                  >
-                    💡Create Task Plan
-                  </Button>
-                )
-            }
-            {
-              // Dynamic buttons exit ingestion
-              props.memory?.session_mode &&
-                props.memory.session_mode === "ingestion_mode" && (
-                  <Button
-                    size={"xs"}
-                    onClick={() => {
-                      handleSubmit &&
-                        handleSubmit(
-                          undefined,
-                          "Let's exit out of ingestion mode."
-                        );
-                    }}
-                    color={"grape"}
-                    style={{ width: "100%" }}
-                  >
-                    💡Exit Ingestion Mode
-                  </Button>
-                )
-            }
           </Flex>
         </Paper>
         <Flex align="center" gap="0.5rem">

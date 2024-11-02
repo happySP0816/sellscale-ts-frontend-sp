@@ -186,8 +186,9 @@ export default function AssetLibraryV2() {
   }, [location]);
 
   const { data: session, refetch } = useQuery({
-    queryKey: ["selix-session", queryParams.get("session_id")],
+    queryKey: [`selix-session-${queryParams.get("session_id")}`],
     queryFn: async () => {
+      console.log("refetching");
       const response = await fetch(
         `${API_URL}/selix/get_session/${queryParams.get("session_id")}`,
         {

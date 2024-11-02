@@ -340,7 +340,6 @@ export default function AssetLibraryV2() {
   const { data: assets, refetch: refetchAssets } = useQuery({
     queryKey: [`get-assets`],
     queryFn: fetchAllAssets,
-    refetchOnWindowFocus: false,
   });
 
   return (

@@ -710,8 +710,7 @@ export default function SelinAI() {
       }
     }
 
-    console.log("got here");
-    queryClient.invalidateQueries(`selix-session-${currentSessionId}`);
+    queryClient.invalidateQueries([`selix-session-${currentSessionId}`]);
   };
 
   const handleEditStrategy = async (prompt: string) => {

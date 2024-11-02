@@ -710,7 +710,8 @@ export default function SelinAI() {
       }
     }
 
-    queryClient.invalidateQueries(["selix-session", currentSessionId]);
+    console.log("got here");
+    queryClient.invalidateQueries(`selix-session-${currentSessionId}`);
   };
 
   const handleEditStrategy = async (prompt: string) => {
@@ -4778,7 +4779,7 @@ const SegmentChat = (props: any) => {
           <Flex style={{ margin: "8px 0px 8px 0px", width: "100%" }}>
             {
               // Dynamic buttons
-              props.memory.session_mode &&
+              props.memory?.session_mode &&
                 props.memory.session_mode === "campaign_builder" &&
                 messages &&
                 messages.length > 5 &&
@@ -4803,7 +4804,7 @@ const SegmentChat = (props: any) => {
             }
             {
               // Dynamic buttons exit ingestion
-              props.memory.session_mode &&
+              props.memory?.session_mode &&
                 props.memory.session_mode === "ingestion_mode" && (
                   <Button
                     size={"xs"}

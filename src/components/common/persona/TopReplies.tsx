@@ -82,7 +82,7 @@ export default function TopReplies() {
   } = useQuery({
     queryKey: [`query-get-all-demos`],
     queryFn: async () => {
-      const response = await fetch(`${API_URL}/client/demo_feedback`, {
+      const response = await fetch(`${API_URL}/client/demo_feedback?client_wide=True`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${userToken}`,
@@ -109,8 +109,6 @@ export default function TopReplies() {
   });
 
   const userData = useRecoilValue(userDataState);
-
-  console.log("userdata: ", userData);
 
   const combinedData = useMemo(() => {
     if (!prospects) {

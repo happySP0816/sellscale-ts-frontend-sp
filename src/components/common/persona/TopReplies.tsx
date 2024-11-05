@@ -72,6 +72,8 @@ export default function TopReplies() {
     refetchOnWindowFocus: false,
   });
 
+  console.log("unfiltered prospects: ", prospects);
+
   const [demoEditOpen, setDemoEditOpen] = useState<boolean>(false);
 
   // Get the prospects that are in Demos, and then active scheduling
@@ -82,12 +84,15 @@ export default function TopReplies() {
   } = useQuery({
     queryKey: [`query-get-all-demos`],
     queryFn: async () => {
-      const response = await fetch(`${API_URL}/client/demo_feedback?client_wide=True`, {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${userToken}`,
-        },
-      });
+      const response = await fetch(
+        `${API_URL}/client/demo_feedback?client_wide=True`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${userToken}`,
+          },
+        }
+      );
 
       if (response.ok) {
         const data = await response.json();
@@ -118,9 +123,14 @@ export default function TopReplies() {
     const demosFeedbacks = demoFeedbacks ?? [];
 
     const filteredProspects = prospects?.filter((p) =>
-      ["SCHEDULING", "DEMO_SET", "DEMO_WON", "DEMO_LOST"].includes(
-        p.status ?? ""
-      )
+      [
+        "SCHEDULING",
+        "DEMO_SET",
+        "DEMO_WON",
+        "DEMO_LOST",
+        "ACTIVE_CONVO_REVIVAL",
+        "ACTIVE_CONVO_SCHEDULING",
+      ].includes(p.status ?? "")
     );
 
     let demoCount = 0;
@@ -141,10 +151,24 @@ export default function TopReplies() {
             return -1;
           } else if (!a.demo_date && b.demo_date) {
             return 1;
-          } else {
-            return b.icp_fit_score - a.icp_fit_score;
+          } else if (a.demo_date && b.demo_date) {
+            return new Date(a.demo_date) > new Date(b.demo_date) ? 1 : -1;
           }
         }
+
+        if (
+          a.status?.includes("SCHEDULING") &&
+          !b.status?.includes("SCHEDULING")
+        ) {
+          return -1;
+        } else if (
+          b.status?.includes("SCHEDULING") &&
+          !a.status?.includes("SCHEDULING")
+        ) {
+          return 1;
+        }
+
+        return b.icp_fit_score - a.icp_fit_score;
       })
       .map((p) => {
         const demos = demosFeedbacks.filter((d: any) => d.prospect_id === p.id);
@@ -240,6 +264,7 @@ export default function TopReplies() {
         return {
           id: p.id,
           sdr_id: clientSDR ? clientSDR.id : -1,
+          demo_date: p.demo_date,
           userAvatar: p.img_url,
           username: p.full_name,
           title: p.title,
@@ -260,11 +285,12 @@ export default function TopReplies() {
                   return {
                     demo_id: d.id,
                     reply_rating: d ? +d.rating.split("/")[0] : 0,
-                    reply_status: d
-                      ? "Occured"
-                      : p.demo_date
-                      ? "Scheduled"
-                      : "Scheduling",
+                    reply_status:
+                      d || (p.demo_date && new Date(p.demo_date) < new Date())
+                        ? "Occured"
+                        : p.demo_date
+                        ? "Scheduled"
+                        : "Scheduling",
                     reply_feedback: d
                       ? d.feedback
                       : "Demo did not occured yet.",
@@ -280,9 +306,18 @@ export default function TopReplies() {
               : [
                   {
                     demo_id: -1,
-                    reply_rating: 0,
-                    reply_status: p.demo_date ? "Scheduled" : "Scheduling",
-                    reply_feedback: "Demo did not occured yet.",
+                    reply_status:
+                      p.demo_date && new Date(p.demo_date) < new Date()
+                        ? "Occured"
+                        : p.demo_date
+                        ? "Scheduled"
+                        : p.status?.includes("SCHEDULING")
+                        ? "Scheduling"
+                        : "Revived",
+                    reply_feedback:
+                      p.demo_date && new Date(p.demo_date) < new Date()
+                        ? "Add Feedback."
+                        : "Demo did not occured yet.",
                     reply_date: p.demo_date
                       ? `Scheduled for ${formatDateToYYYYMMDD(
                           new Date(p.demo_date)
@@ -499,15 +534,19 @@ export default function TopReplies() {
                                 </Text>
                               </Flex>
                               <Flex align={"center"}>
-                                <Text size={"xs"} fw={500}>
-                                  Rating:
-                                </Text>
-                                <Rating
-                                  readOnly
-                                  size="xs"
-                                  defaultValue={demo.reply_rating}
-                                  ml={4}
-                                />
+                                {demo.reply_rating && (
+                                  <>
+                                    <Text size={"xs"} fw={500}>
+                                      Rating:
+                                    </Text>
+                                    <Rating
+                                      readOnly
+                                      size="xs"
+                                      defaultValue={demo.reply_rating}
+                                      ml={4}
+                                    />
+                                  </>
+                                )}
                               </Flex>
                               <Flex align={"center"} gap={"xs"}>
                                 <Text size={"xs"} fw={500}>
@@ -523,9 +562,8 @@ export default function TopReplies() {
                     </ScrollArea>
                     <Tooltip
                       label={
-                        !item.demos ||
-                        item.demos.length === 0 ||
-                        item.demos[0].reply_status !== "Occured" ||
+                        !item.demo_date ||
+                        new Date(item.demo_date) > new Date() ||
                         item.sdr_id !== userData.id
                           ? "The demo has not occured yet. If it has, only the SDR that the prospect belong to can add feedback."
                           : ""
@@ -541,9 +579,8 @@ export default function TopReplies() {
                             setDemosDrawerOpened(true);
                           }}
                           disabled={
-                            !item.demos ||
-                            item.demos.length === 0 ||
-                            item.demos[0].reply_status !== "Occured" ||
+                            !item.demo_date ||
+                            new Date(item.demo_date) > new Date() ||
                             item.sdr_id !== userData.id
                           }
                         >

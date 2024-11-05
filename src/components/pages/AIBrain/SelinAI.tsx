@@ -1332,9 +1332,8 @@ export default function SelinAI() {
 
     if (recording) {
       intervalId = setInterval(() => {
-        const memory = threads.find(
-          (thread) => thread.id === currentSessionId
-        )?.memory;
+        const memory = threads.find((thread) => thread.id === currentSessionId)
+          ?.memory;
         if (
           memory?.strategy_id &&
           promptLengthRef.current > prevPromptLengthRef.current + 80
@@ -1829,16 +1828,17 @@ export default function SelinAI() {
 
   const [memoryLineUpdating, setMemoryLineUpdating] = useState(false);
 
-  const memory = threads.find(
-    (thread) => thread.id === sessionIDRef.current
-  )?.memory;
+  const memory = threads.find((thread) => thread.id === sessionIDRef.current)
+    ?.memory;
 
   const supervisorMemory = threads.find(
     (thread) => thread.is_supervisor_session
   )?.memory;
 
-  const [clientMemoryStateUpdatedTime, setClientMemoryStateUpdatedTime] =
-    useState<any>(memory?.memory_line_time_updated);
+  const [
+    clientMemoryStateUpdatedTime,
+    setClientMemoryStateUpdatedTime,
+  ] = useState<any>(memory?.memory_line_time_updated);
 
   const [chatfullSize, setChatfullSize] = useState(true);
 
@@ -2435,10 +2435,12 @@ export default function SelinAI() {
                                                                           "none",
                                                                         position:
                                                                           "absolute",
-                                                                        top: "4px",
+                                                                        top:
+                                                                          "4px",
                                                                         right:
                                                                           "4px",
-                                                                        gap: "4px",
+                                                                        gap:
+                                                                          "4px",
                                                                         backgroundColor:
                                                                           "white",
                                                                       }}
@@ -3862,11 +3864,7 @@ const SegmentChat = (props: any) => {
     }
   };
 
-  const {
-    data: logs,
-    refetch,
-    isLoading,
-  } = useQuery({
+  const { data: logs, refetch, isLoading } = useQuery({
     queryKey: ["selix_event_logs_planner_component_segment_chat"],
     queryFn: async () => {
       let l: MemoryLog[] = await fetchSelixLogs();
@@ -4066,33 +4064,32 @@ const SegmentChat = (props: any) => {
                               : message.role !== "assistant"
                               ? userData.sdr_name
                               : "Selix AI"}
-                            {message.type === "slack" &&
-                              message.slack_channel && (
-                                <Text component="span" fw={700}>
-                                  {" via "}
-                                  <img
-                                    src={SlackLogo}
-                                    alt="slack"
-                                    width={10}
-                                    height={10}
-                                    style={{ margin: "0 4px" }}
-                                  />
-                                  {" Slack"}
-                                  <Text
-                                    component="a"
-                                    href={`https://slack.com/app_redirect?channel=${message.slack_channel}`}
-                                    style={{
-                                      color: "#1E90FF",
-                                      textDecoration: "underline",
-                                      marginLeft: "4px",
-                                    }}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                  >
-                                    #{message.slack_channel}
-                                  </Text>
+                            {message.type === "slack" && message.slack_channel && (
+                              <Text component="span" fw={700}>
+                                {" via "}
+                                <img
+                                  src={SlackLogo}
+                                  alt="slack"
+                                  width={10}
+                                  height={10}
+                                  style={{ margin: "0 4px" }}
+                                />
+                                {" Slack"}
+                                <Text
+                                  component="a"
+                                  href={`https://slack.com/app_redirect?channel=${message.slack_channel}`}
+                                  style={{
+                                    color: "#1E90FF",
+                                    textDecoration: "underline",
+                                    marginLeft: "4px",
+                                  }}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                >
+                                  #{message.slack_channel}
                                 </Text>
-                              )}
+                              </Text>
+                            )}
                           </Text>
                           {message.role !== "user" &&
                             message.message !== "loading" &&
@@ -5788,8 +5785,9 @@ export const PlannerComponent = ({
   const [opened, { toggle }] = useDisclosure(true);
   const taskContainerRef = useRef<HTMLDivElement>(null);
   const [openedTaskIndex, setOpenedTaskIndex] = useState<number | null>(null);
-  const [currentProject, setCurrentProject] =
-    useRecoilState(currentProjectState);
+  const [currentProject, setCurrentProject] = useRecoilState(
+    currentProjectState
+  );
   const userToken = useRecoilValue(userTokenState);
   const [showRewindImage, setShowRewindImage] = useState(false);
   const [showAutoExecutionModal, setShowAutoExecutionModal] = useState(false);
@@ -6121,8 +6119,10 @@ export const PlannerComponent = ({
     }
   };
 
-  const [selectedPersona, setSelectedPersona] =
-    useState<PersonaOverview | null>(currentProject);
+  const [
+    selectedPersona,
+    setSelectedPersona,
+  ] = useState<PersonaOverview | null>(currentProject);
 
   console.log("selected persona", selectedPersona);
 
@@ -6142,47 +6142,97 @@ export const PlannerComponent = ({
           style={{ borderColor: "#fadafc" }}
         >
           <Flex align={"center"} gap={"xs"} justify={"space-between"}>
-            {currentProject &&
-              currentThread?.memory.campaign_id === currentProject?.id && (
-                <Text size={"xs"} color="#E25DEE" fw={600}>
-                  Selix Tasks:{" "}
-                  {isInternal && (
-                    <Select
-                      value={"" + selectedPersona?.id}
-                      data={
-                        personas
-                          ? personas.map((p) => {
-                              return {
-                                value: "" + p.id,
-                                label: `${p.id}: ${p.name}`,
-                              };
-                            })
-                          : []
-                      }
-                      placeholder={"select your archetypes"}
-                      onChange={async (value) => {
-                        if (value) {
-                          await editSession(currentThread.id, +value);
-                          setSelectedPersona(
-                            personas?.find((p) => p.id === +value) ?? null
-                          );
-                        }
-                      }}
-                    />
-                  )}
-                  <span className="font-medium text-gray-500">
-                    {!isInternal && currentProject.name}{" "}
-                    <a
-                      href={`/campaign_v2/${currentProject.id}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      style={{ marginLeft: "5px" }}
+            <Flex w="100%">
+              {currentProject &&
+                currentThread?.memory.campaign_id === currentProject?.id && (
+                  <Flex w={isInternal ? "70%" : "100%"}>
+                    <Text
+                      size={"xs"}
+                      color="#E25DEE"
+                      fw={600}
+                      mt="xs"
+                      miw="70px"
                     >
-                      <IconExternalLink size="0.8rem" />
-                    </a>
-                  </span>
-                </Text>
+                      Selix Tasks:{" "}
+                    </Text>
+                    {isInternal && (
+                      <Select
+                        ml="xs"
+                        w="80%"
+                        value={"" + selectedPersona?.id}
+                        data={
+                          personas
+                            ? personas.map((p) => {
+                                return {
+                                  value: "" + p.id,
+                                  label: `${p.id}: ${p.name}`,
+                                };
+                              })
+                            : []
+                        }
+                        placeholder={"select your archetypes"}
+                        onChange={async (value) => {
+                          if (value) {
+                            await editSession(currentThread.id, +value);
+                            setSelectedPersona(
+                              personas?.find((p) => p.id === +value) ?? null
+                            );
+                          }
+                        }}
+                      />
+                    )}
+                    <span
+                      className="font-medium text-gray-500"
+                      style={{ marginTop: "8px" }}
+                    >
+                      {!isInternal && currentProject.name}{" "}
+                      <a
+                        href={`/campaign_v2/${currentProject.id}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{ marginLeft: "5px", marginTop: "12px" }}
+                      >
+                        <IconExternalLink size="0.8rem" />
+                      </a>
+                    </span>
+                  </Flex>
+                )}
+              {isInternal && (
+                <Box
+                  w="30%"
+                  style={{ display: "flex", justifyContent: "flex-end" }}
+                >
+                  <Tooltip
+                    label={
+                      <Box bg="white" p="sm">
+                        <Card withBorder>
+                          <Text fw="600" color="black">
+                            Can execute 3 tasks:
+                          </Text>
+                          <List withPadding size={"xs"}>
+                            <List.Item>3. Prepare Strategy</List.Item>
+                            <List.Item>
+                              4. Assembly list of marketing prospects
+                            </List.Item>
+                            <List.Item>6. Block for review</List.Item>
+                          </List>
+                        </Card>
+                      </Box>
+                    }
+                    p="0px"
+                    withArrow
+                  >
+                    <Button
+                      color="red"
+                      leftIcon={<IconBolt />}
+                      onClick={() => alert("Execute tasks")}
+                    >
+                      Execute 6 Tasks
+                    </Button>
+                  </Tooltip>
+                </Box>
               )}
+            </Flex>
             {threads.find((thread) => thread.id === currentSessionId)
               ?.estimated_completion_time && (
               <Flex gap={5} align={"center"}>
@@ -6676,14 +6726,15 @@ export const PlannerComponent = ({
                                         onChange={(value) => {
                                           if (value !== null) {
                                             const updatedTasks = [...tasks];
-                                            updatedTasks[index].status =
-                                              value as
-                                                | "QUEUED"
-                                                | "IN_PROGRESS"
-                                                | "IN_PROGRESS_REVIEW_NEEDED"
-                                                | "COMPLETE"
-                                                | "CANCELLED"
-                                                | "BLOCKED";
+                                            updatedTasks[
+                                              index
+                                            ].status = value as
+                                              | "QUEUED"
+                                              | "IN_PROGRESS"
+                                              | "IN_PROGRESS_REVIEW_NEEDED"
+                                              | "COMPLETE"
+                                              | "CANCELLED"
+                                              | "BLOCKED";
                                             setTasks(updatedTasks);
                                           }
                                         }}
@@ -6815,10 +6866,8 @@ export const PlannerComponent = ({
                                         <RichTextArea
                                           overrideSticky={true}
                                           onChange={(value, rawValue) => {
-                                            taskDraftDescriptionRaw.current =
-                                              rawValue;
-                                            taskDraftDescription.current =
-                                              value;
+                                            taskDraftDescriptionRaw.current = rawValue;
+                                            taskDraftDescription.current = value;
                                           }}
                                           value={
                                             taskDraftDescriptionRaw.current
@@ -7119,8 +7168,9 @@ const TaskRenderer = ({
   handleStrategySubmit: () => void;
   setOpenedTaskIndex: React.Dispatch<React.SetStateAction<number | null>>;
 }) => {
-  const [currentProject, setCurrentProject] =
-    useRecoilState(currentProjectState);
+  const [currentProject, setCurrentProject] = useRecoilState(
+    currentProjectState
+  );
   const sequencesV2Ref = useRef(null);
   const [lastLoadedProjectId, setLastLoadedProjectId] = useState<number>(-1);
   const [sequences, setSequences] = useState<any[]>([]);
@@ -7497,9 +7547,8 @@ const SelinStrategy = ({
   counter: Number;
   setOpenedTaskIndex?: React.Dispatch<React.SetStateAction<number | null>>;
 }) => {
-  const memory = threads.find(
-    (thread) => thread.id === currentSessionId
-  )?.memory;
+  const memory = threads.find((thread) => thread.id === currentSessionId)
+    ?.memory;
 
   const hackedSubmit = () => {
     handleSubmit &&

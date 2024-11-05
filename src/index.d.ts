@@ -236,6 +236,7 @@ export interface Prospect {
   matched_filter_words?: string[];
   matched_filters?: string[];
   meta_data?: Record<string, any>;
+  status?: string;
 
   icp_company_fit_score: number;
   // putting string for now

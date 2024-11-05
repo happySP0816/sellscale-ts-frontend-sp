@@ -34,6 +34,7 @@ import SellScaleAssistant from "./AIBrain/SellScaleAssistant";
 import WhatHappenedLastWeek from "./AIBrain/WhatHappenedLastWeek";
 import CampaignCurator from "@common/campaigns/CampaignCuratorV2";
 import AssetLibraryV2 from "./AssetLibrary/AssetLibraryV2";
+import TopReplies from "@common/persona/TopReplies";
 
 const AnalyticsPageNew = () => {
   const userToken = useRecoilValue(userTokenState);
@@ -76,9 +77,12 @@ const AnalyticsPageNew = () => {
           <Tabs.Tab value="sequences">Sequences </Tabs.Tab> */}
           <Tabs.Tab value="strategy">Strategies </Tabs.Tab>
           <Tabs.Tab value="segment_builder">Segments Builder </Tabs.Tab>
-          <Tabs.Tab value="what_happened_last_week">What Happened Last Week </Tabs.Tab>
+          <Tabs.Tab value="what_happened_last_week">
+            What Happened Last Week{" "}
+          </Tabs.Tab>
           <Tabs.Tab value="campaign_curator">Campaign Curator</Tabs.Tab>
           <Tabs.Tab value="asset_library">Asset Library</Tabs.Tab>
+          <Tabs.Tab value="top_replies">Top Replies</Tabs.Tab>
           <Tabs.Tab value="tam" ml="auto">
             TAM
           </Tabs.Tab>
@@ -114,6 +118,9 @@ const AnalyticsPageNew = () => {
         </Tabs.Panel>
         <Tabs.Panel value="demo-feedback" pt="xs">
           <DemoFeedbackChartV2 />
+        </Tabs.Panel>
+        <Tabs.Panel value="top_replies" pt="xs">
+          <TopReplies />
         </Tabs.Panel>
         <Tabs.Panel value="message-analytics" pt="xs">
           <MessagingAnalytics />

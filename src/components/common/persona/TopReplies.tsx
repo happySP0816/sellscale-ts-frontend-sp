@@ -380,11 +380,23 @@ export default function TopReplies() {
                               href={`/prospects/${item.id}`}
                               target={"_blank"}
                               unselectable={
-                                item.sdr_id !== userData.id ? "on" : "off"
+                                item.sdr_id !== userData.id ? "off" : "on"
                               }
+                              style={{
+                                pointerEvents:
+                                  item.sdr_id !== userData.id ? "none" : "auto",
+                                color:
+                                  item.sdr_id !== userData.id
+                                    ? "gray"
+                                    : undefined, // Changes color if disabled
+                                textDecoration:
+                                  item.sdr_id !== userData.id
+                                    ? "none"
+                                    : undefined, // Removes underline if disabled
+                              }}
                             >
                               <Text size={"sm"} underline>
-                                View Conversion
+                                View Conversation
                               </Text>
                             </Anchor>
                           </Tooltip>

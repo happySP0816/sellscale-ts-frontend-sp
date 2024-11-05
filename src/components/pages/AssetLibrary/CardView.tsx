@@ -292,6 +292,10 @@ export default function CardView(props: any) {
   };
 
   const isSequenceType = function (item: AssetType) {
+    if (!item.asset_tag) {
+      return false;
+    }
+
     return (
       item.asset_tag === "CTA" ||
       item.asset_tag === "Linkedin Initial Template" ||
@@ -983,9 +987,13 @@ export default function CardView(props: any) {
                 .filter((item: AssetType) => {
                   const lowerSearch = textFilterOther.toLowerCase();
 
+                  if (!item.asset_tag) {
+                    return item.asset_key.toLowerCase().includes(lowerSearch);
+                  }
+
                   return (
                     item.asset_key.toLowerCase().includes(lowerSearch) ||
-                    item.asset_tag.toLowerCase().includes(lowerSearch)
+                    item.asset_tag?.toLowerCase().includes(lowerSearch)
                   );
                 })
                 .slice(

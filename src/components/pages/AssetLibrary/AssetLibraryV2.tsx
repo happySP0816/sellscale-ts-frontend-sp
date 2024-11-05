@@ -41,6 +41,8 @@ import { Dropzone, MIME_TYPES } from "@mantine/dropzone";
 import { useParams, useLocation } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { ThreadType } from "@pages/AIBrain/SelinAI";
+import { getPersonasOverview } from "@utils/requests/getPersonas";
+import { PersonaOverview } from "src";
 
 export type AssetType = {
   asset_key: string;
@@ -237,7 +239,7 @@ export default function AssetLibraryV2() {
     refetch();
     setLoading(false);
   };
- 
+
   const fetchAllAssets = async () => {
     try {
       setLoading(true);
@@ -344,7 +346,7 @@ export default function AssetLibraryV2() {
 
   return (
     <Flex direction={"column"} px={"5%"} gap={"sm"} bg={"white"}>
-      <LoadingOverlay visible={loading} zIndex={3}/>
+      <LoadingOverlay visible={loading} zIndex={3} />
       <Flex mt="md" align={"center"} justify={"space-between"}>
         <Flex align={"center"} gap={"4px"}>
           <Text size={"25px"} fw={700}>
@@ -545,6 +547,7 @@ export default function AssetLibraryV2() {
             sessionAssets={filteredSessionAssets}
             baselineAssets={filteredBaselineAssets}
             otherAssets={filteredOtherAssets}
+            campaignId={session?.memory?.campaign_id}
           />
         ) : (
           <ListView
@@ -590,12 +593,32 @@ export default function AssetLibraryV2() {
             >
               <Group mt="xs">
                 <Radio value="CTA" label="CTAs" size="sm" />
-                <Radio value="Linkedin Initial Template" label={"Li Initial Template"} size="sm"/>
-                
-                <Radio value="Email Initial Template" label="Email Initial Template" size="sm" />
-                <Radio value="Linkedin Bump Framework" label="Li Bump Framework" size="sm" />
-                <Radio value="Email Followup" label="Email Followup" size="sm" />
-                <Radio value="Copy / research" label="Copy / research" size="sm" />
+                <Radio
+                  value="Linkedin Initial Template"
+                  label={"Li Initial Template"}
+                  size="sm"
+                />
+
+                <Radio
+                  value="Email Initial Template"
+                  label="Email Initial Template"
+                  size="sm"
+                />
+                <Radio
+                  value="Linkedin Bump Framework"
+                  label="Li Bump Framework"
+                  size="sm"
+                />
+                <Radio
+                  value="Email Followup"
+                  label="Email Followup"
+                  size="sm"
+                />
+                <Radio
+                  value="Copy / research"
+                  label="Copy / research"
+                  size="sm"
+                />
                 <Radio value="Value Props" label="Value Props" size="sm" />
                 <Radio value="Phrases" label="Phrases" size="sm" />
                 <Radio value="Social Proof" label="Social Proof" size="sm" />

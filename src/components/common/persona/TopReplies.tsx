@@ -52,7 +52,7 @@ export default function TopReplies() {
     isFetching,
     refetch,
   } = useQuery({
-    queryKey: [`query-dash-get-prospects`],
+    queryKey: [`query-dash-get-prospects-top-replies`],
     queryFn: async () => {
       const response = await getProspects(
         userToken,

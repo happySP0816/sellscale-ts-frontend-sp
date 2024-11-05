@@ -18,11 +18,13 @@ import {
   LoadingOverlay,
   Paper,
   Rating,
+  ScrollArea,
   Select,
   Text,
   TextInput,
   Tooltip,
 } from "@mantine/core";
+import EditDemoFeedbackModal from "@modals/EditDemoFeedbackModal";
 import { isNativeFetch } from "@sentry/utils";
 import {
   IconBriefcase,
@@ -39,7 +41,7 @@ import { getProspects } from "@utils/requests/getProspects";
 import { setSourceMapsEnabled } from "process";
 import { useMemo, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
-import { ClientSDR, Prospect } from "src";
+import { ClientSDR, DemoFeedback, Prospect } from "src";
 
 export default function TopReplies() {
   const userToken = useRecoilValue(userTokenState);
@@ -70,7 +72,7 @@ export default function TopReplies() {
     refetchOnWindowFocus: false,
   });
 
-  console.log("prospects: ", prospects);
+  const [demoEditOpen, setDemoEditOpen] = useState<boolean>(false);
 
   // Get the prospects that are in Demos, and then active scheduling
   const {
@@ -80,7 +82,7 @@ export default function TopReplies() {
   } = useQuery({
     queryKey: [`query-get-all-demos`],
     queryFn: async () => {
-      const response = await fetch(`${API_URL}/client/demo_feedback_feed`, {
+      const response = await fetch(`${API_URL}/client/demo_feedback`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${userToken}`,
@@ -90,10 +92,10 @@ export default function TopReplies() {
       if (response.ok) {
         const data = await response.json();
 
-        return data.data;
+        return data.data as DemoFeedback[];
       }
 
-      return [];
+      return [] as DemoFeedback[];
     },
     refetchOnWindowFocus: false,
   });
@@ -115,7 +117,7 @@ export default function TopReplies() {
       return [];
     }
 
-    const demos = demoFeedbacks ?? [];
+    const demosFeedbacks = demoFeedbacks ?? [];
 
     const filteredProspects = prospects?.filter((p) =>
       ["SCHEDULING", "DEMO_SET", "DEMO_WON", "DEMO_LOST"].includes(
@@ -129,8 +131,8 @@ export default function TopReplies() {
 
     return filteredProspects
       .sort((a, b) => {
-        const demoA = demos.find((d: any) => d.prospect_id === a.id);
-        const demoB = demos.find((d: any) => d.prospect_id === b.id);
+        const demoA = demosFeedbacks.find((d: any) => d.prospect_id === a.id);
+        const demoB = demosFeedbacks.find((d: any) => d.prospect_id === b.id);
 
         if (demoA && !demoB) {
           return -1;
@@ -147,7 +149,7 @@ export default function TopReplies() {
         }
       })
       .map((p) => {
-        const demo = demos.find((d: any) => d.prospect_id === p.id);
+        const demos = demosFeedbacks.filter((d: any) => d.prospect_id === p.id);
 
         const li_last_message_timestamp = p.li_last_message_timestamp;
         const email_last_message_timestamp = p.email_last_message_timestamp;
@@ -219,7 +221,7 @@ export default function TopReplies() {
             color = "yellow";
         }
 
-        if (demo) {
+        if (demos) {
           demoCount += 1;
         } else if (p.demo_date) {
           scheduledCount += 1;
@@ -227,7 +229,7 @@ export default function TopReplies() {
           schedulingCount += 1;
         }
 
-        const topText = demo
+        const topText = demos
           ? `Demo #${demoCount} with ${clientSDR ? clientSDR.sdr_name : ""}`
           : p.demo_date
           ? `Scheduled #${scheduledCount} with ${
@@ -254,31 +256,48 @@ export default function TopReplies() {
             ? p.li_last_message_from_prospect
             : p.email_last_message_from_prospect,
           replied_username: clientSDR ? clientSDR.sdr_name : "",
-          reply_rating: demo ? +demo.demo_rating.split("/")[0] : 0,
-          reply_status: demo
-            ? "Occured"
-            : p.demo_date
-            ? "Scheduled"
-            : "Scheduling",
-          reply_feedback: demo
-            ? demo.demo_feedback
-            : "Demo did not occured yet.",
-          reply_date: demo
-            ? demo.demo_date
-            : p.demo_date
-            ? `Scheduled for ${formatDateToYYYYMMDD(new Date(p.demo_date))}`
-            : "-",
+          demos:
+            demos && demos.length > 0
+              ? demos.map((d: DemoFeedback) => {
+                  return {
+                    demo_id: d.id,
+                    reply_rating: d ? +d.rating.split("/")[0] : 0,
+                    reply_status: d
+                      ? "Occured"
+                      : p.demo_date
+                      ? "Scheduled"
+                      : "Scheduling",
+                    reply_feedback: d
+                      ? d.feedback
+                      : "Demo did not occured yet.",
+                    reply_date: d
+                      ? d.demo_date
+                      : p.demo_date
+                      ? `Scheduled for ${formatDateToYYYYMMDD(
+                          new Date(p.demo_date)
+                        )}`
+                      : "-",
+                  };
+                })
+              : [
+                  {
+                    demo_id: -1,
+                    reply_rating: 0,
+                    reply_status: p.demo_date ? "Scheduled" : "Scheduling",
+                    reply_feedback: "Demo did not occured yet.",
+                    reply_date: p.demo_date
+                      ? `Scheduled for ${formatDateToYYYYMMDD(
+                          new Date(p.demo_date)
+                        )}`
+                      : "-",
+                  },
+                ],
           reply_userAvatar: clientSDR ? clientSDR.img_url : "",
           status: p.linkedin_status
             ? p.linkedin_status
             : p.email_status
             ? p.email_status
             : "",
-          count: demo
-            ? demoCount
-            : p.demo_date
-            ? scheduledCount
-            : schedulingCount,
           top_text: topText,
         };
       });
@@ -292,6 +311,8 @@ export default function TopReplies() {
 
   const [demosDrawerOpened, setDemosDrawerOpened] =
     useRecoilState(demosDrawerOpenState);
+
+  const [demoSelected, setDemoSelected] = useState<DemoFeedback | null>(null);
 
   return (
     <Box>
@@ -421,57 +442,80 @@ export default function TopReplies() {
                         {item.status.split("_").join(" ")}
                       </Badge>
                     </Flex>
-                    <Paper p={"sm"} withBorder mt={4}>
-                      <Flex align={"center"} justify={"space-between"}>
-                        <Flex align={"center"} gap={"sm"}>
-                          <Avatar
-                            src={item.reply_userAvatar}
-                            radius={"xl"}
-                            size={50}
-                          />
-                          <Box>
-                            <Text fw={500} size={"sm"}>
-                              {item.top_text}
-                            </Text>
-                            <Text fw={500} color="gray" size={"xs"}>
-                              {item.reply_date}
-                            </Text>
-                          </Box>
-                        </Flex>
-                        <ActionIcon>
-                          <IconEdit size={"1rem"} color="gray" />
-                        </ActionIcon>
-                      </Flex>
-                      <Flex align={"center"} gap={"xs"} mt={"sm"}>
-                        <Text size={"xs"} fw={500}>
-                          Status:{" "}
-                          <span className="text-gray-400 ml-[4px]">
-                            {item.reply_status}
-                          </span>
-                        </Text>
-                      </Flex>
-                      <Flex align={"center"}>
-                        <Text size={"xs"} fw={500}>
-                          Rating:
-                        </Text>
-                        <Rating
-                          size="xs"
-                          defaultValue={item.reply_rating}
-                          ml={4}
-                        />
-                      </Flex>
-                      <Flex align={"center"} gap={"xs"}>
-                        <Text size={"xs"} fw={500}>
-                          Feedback:{" "}
-                          <span className="text-gray-400 ml-[4px]">
-                            {item.reply_feedback}
-                          </span>
-                        </Text>
-                      </Flex>
-                    </Paper>
+                    <ScrollArea h={200}>
+                      {item.demos &&
+                        item.demos.map((demo: any) => {
+                          return (
+                            <Paper p={"sm"} withBorder mt={4}>
+                              <Flex align={"center"} justify={"space-between"}>
+                                <Flex align={"center"} gap={"sm"}>
+                                  <Avatar
+                                    src={item.reply_userAvatar}
+                                    radius={"xl"}
+                                    size={50}
+                                  />
+                                  <Box>
+                                    <Text fw={500} size={"sm"}>
+                                      {item.top_text}
+                                    </Text>
+                                    <Text fw={500} color="gray" size={"xs"}>
+                                      {demo.reply_date}
+                                    </Text>
+                                  </Box>
+                                </Flex>
+                                {demo.demo_id !== -1 && (
+                                  <ActionIcon
+                                    onClick={() => {
+                                      setDemoSelected(
+                                        demoFeedbacks
+                                          ? demoFeedbacks.find(
+                                              (d) => d.id === demo.demo_id
+                                            ) ?? null
+                                          : null
+                                      );
+                                      setDemoEditOpen(true);
+                                    }}
+                                  >
+                                    <IconEdit size={"1rem"} color="gray" />
+                                  </ActionIcon>
+                                )}
+                              </Flex>
+                              <Flex align={"center"} gap={"xs"} mt={"sm"}>
+                                <Text size={"xs"} w={500}>
+                                  Status:{" "}
+                                  <span className="text-gray-400 ml-[4px]">
+                                    {demo.reply_status}
+                                  </span>
+                                </Text>
+                              </Flex>
+                              <Flex align={"center"}>
+                                <Text size={"xs"} fw={500}>
+                                  Rating:
+                                </Text>
+                                <Rating
+                                  readOnly
+                                  size="xs"
+                                  defaultValue={demo.reply_rating}
+                                  ml={4}
+                                />
+                              </Flex>
+                              <Flex align={"center"} gap={"xs"}>
+                                <Text size={"xs"} fw={500}>
+                                  Feedback:{" "}
+                                  <span className="text-gray-400 ml-[4px]">
+                                    {demo.reply_feedback}
+                                  </span>
+                                </Text>
+                              </Flex>
+                            </Paper>
+                          );
+                        })}
+                    </ScrollArea>
                     <Tooltip
                       label={
-                        item.reply_status !== "Occured" ||
+                        !item.demos ||
+                        item.demos.length === 0 ||
+                        item.demos[0].reply_status !== "Occured" ||
                         item.sdr_id !== userData.id
                           ? "The demo has not occured yet. If it has, only the SDR that the prospect belong to can add feedback."
                           : ""
@@ -487,7 +531,9 @@ export default function TopReplies() {
                             setDemosDrawerOpened(true);
                           }}
                           disabled={
-                            item.reply_status !== "Occured" ||
+                            !item.demos ||
+                            item.demos.length === 0 ||
+                            item.demos[0].reply_status !== "Occured" ||
                             item.sdr_id !== userData.id
                           }
                         >
@@ -502,6 +548,15 @@ export default function TopReplies() {
         <Paper withBorder radius={"sm"}></Paper>
       </Flex>
       <DemoFeedbackDrawer refetch={() => demoFeedbacksRefetch()} />
+      {demoSelected && (
+        <EditDemoFeedbackModal
+          modalOpened={demoEditOpen}
+          openModal={() => setDemoEditOpen(true)}
+          closeModal={() => setDemoEditOpen(false)}
+          demoFeedback={demoSelected}
+          backFunction={() => setDemoEditOpen(false)}
+        />
+      )}
     </Box>
   );
 }

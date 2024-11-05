@@ -17,6 +17,7 @@ import {
 import { DatePicker } from '@mantine/dates';
 import { useForm } from '@mantine/form';
 import { showNotification } from '@mantine/notifications';
+import { useQueryClient } from '@tanstack/react-query';
 import patchDemoFeedback from '@utils/requests/patchDemoFeedback';
 import { useEffect, useState } from 'react';
 import { useRecoilValue } from 'recoil';
@@ -33,6 +34,8 @@ interface EditDemoFeedback extends Record<string, unknown> {
 export default function EditDemoFeedbackModal(props: EditDemoFeedback) {
   const userToken = useRecoilValue(userTokenState);
   const [loading, setLoading] = useState(false);
+
+  const queryClient = useQueryClient();
 
   const triggerUpdateDemoFeedback = async (values: typeof demoFeedbackForm.values) => {
     setLoading(true);
@@ -66,6 +69,7 @@ export default function EditDemoFeedbackModal(props: EditDemoFeedback) {
     }
 
     setLoading(false);
+    queryClient.invalidateQueries(['query-get-all-demos']);
   };
 
   const [reschedule, setReschedule] = useState(false);
@@ -84,7 +88,7 @@ export default function EditDemoFeedbackModal(props: EditDemoFeedback) {
 
   useEffect(() => {
     if (demoFeedbackForm.values.demoHappen === 'reschedule') {
-      setReschedule(true);
+setReschedule(true);
     } else if (demoFeedbackForm.values.demoHappen === 'yes') {
       setReschedule(false);
       setShowedUp(true);

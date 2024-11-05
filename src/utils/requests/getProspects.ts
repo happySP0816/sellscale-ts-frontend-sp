@@ -15,7 +15,8 @@ export async function getProspects(
   persona_id?: number,
   shallow_data?: boolean,
   prospect_id?: number,
-  icp_fit_score?: number
+  icp_fit_score?: number,
+  clientWide: boolean = false,
 ): Promise<MsgResponse> {
   const response = await fetch(`${API_URL}/prospect/get_prospects`, {
     method: 'POST',
@@ -32,6 +33,7 @@ export async function getProspects(
       persona_id: persona_id,
       shallow_data: shallow_data,
       prospect_id: prospect_id,
+      client_wide: clientWide
     }),
   });
 

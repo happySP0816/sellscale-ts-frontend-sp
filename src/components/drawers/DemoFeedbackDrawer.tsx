@@ -24,40 +24,50 @@ import {
   Tooltip,
   Checkbox,
   Card,
-} from '@mantine/core';
-import { useRecoilState, useRecoilValue } from 'recoil';
-import { QueryClient, useQuery } from '@tanstack/react-query';
+  Modal,
+} from "@mantine/core";
+import { useRecoilState, useRecoilValue } from "recoil";
+import { QueryClient, useQuery } from "@tanstack/react-query";
 import {
   channelToIcon,
   sendAttemptingRescheduleNotification,
   updateChannelStatus,
-} from '../common/prospectDetails/ProspectDetailsChangeStatus';
-import { userTokenState } from '@atoms/userAtoms';
-import { useEffect, useRef, useState } from 'react';
-import { Channel, Prospect } from 'src';
-import { API_URL } from '@constants/data';
-import { demosDrawerOpenState, demosDrawerProspectIdState } from '@atoms/dashboardAtoms';
-import Assistant from '@assets/images/assistant.svg';
-import ProspectDemoDateSelector from '@common/prospectDetails/ProspectDemoDateSelector';
-import { useForm } from '@mantine/form';
-import { DemoRating } from '@common/home/dashboard/demo/DemoRating';
-import { showNotification } from '@mantine/notifications';
-import { getProspects } from '@utils/requests/getProspects';
-import DemoFeedbackCard from '@common/demo_feedback/DemoFeedbackCard';
-import { DatePicker, DatePickerInput } from '@mantine/dates';
-import postSubmitDemoFeedback from '@utils/requests/postSubmitDemoFeedback';
-import { IconCalendar } from '@tabler/icons';
+} from "../common/prospectDetails/ProspectDetailsChangeStatus";
+import { userTokenState } from "@atoms/userAtoms";
+import { useEffect, useRef, useState } from "react";
+import { Channel, Prospect } from "src";
+import { API_URL } from "@constants/data";
+import {
+  demosDrawerOpenState,
+  demosDrawerProspectIdState,
+} from "@atoms/dashboardAtoms";
+import Assistant from "@assets/images/assistant.svg";
+import ProspectDemoDateSelector from "@common/prospectDetails/ProspectDemoDateSelector";
+import { useForm } from "@mantine/form";
+import { DemoRating } from "@common/home/dashboard/demo/DemoRating";
+import { showNotification } from "@mantine/notifications";
+import { getProspects } from "@utils/requests/getProspects";
+import DemoFeedbackCard from "@common/demo_feedback/DemoFeedbackCard";
+import { DatePicker, DatePickerInput } from "@mantine/dates";
+import postSubmitDemoFeedback from "@utils/requests/postSubmitDemoFeedback";
+import { IconCalendar } from "@tabler/icons";
 
-export default function DemoFeedbackDrawer(props: { refetch: () => void; onSubmit?: () => void }) {
+export default function DemoFeedbackDrawer(props: {
+  refetch: () => void;
+  onSubmit?: () => void;
+}) {
   const theme = useMantineTheme();
   const queryClient = new QueryClient();
 
-  const [drawerProspectId, setDrawerProspectId] = useRecoilState(demosDrawerProspectIdState);
+  const [drawerProspectId, setDrawerProspectId] = useRecoilState(
+    demosDrawerProspectIdState
+  );
 
   // This component is only rendered if drawerOpened=true - which isn't helpful for the first render
   // So we use actuallyOpened to control when the drawer opens and delay it by 100ms (for the animation to play)
   const [drawerOpened, setDrawerOpened] = useRecoilState(demosDrawerOpenState);
   const [actuallyOpened, setActuallyOpened] = useState(false);
+
   useEffect(() => {
     if (drawerOpened !== actuallyOpened) {
       setTimeout(() => {
@@ -74,12 +84,12 @@ export default function DemoFeedbackDrawer(props: { refetch: () => void; onSubmi
       const response = await getProspects(
         userToken,
         undefined,
-        'SELLSCALE',
+        "SELLSCALE",
         10000, // TODO: Maybe use pagination method instead
-        ['DEMO'],
-        'ALL'
+        ["DEMO"],
+        "ALL"
       );
-      return response.status === 'success' ? (response.data as Prospect[]) : [];
+      return response.status === "success" ? (response.data as Prospect[]) : [];
     },
     refetchOnWindowFocus: false,
   });
@@ -94,12 +104,12 @@ export default function DemoFeedbackDrawer(props: { refetch: () => void; onSubmi
 
   const form = useForm({
     initialValues: {
-      demoHappen: 'yes',
+      demoHappen: "yes",
       demoRating: 3,
-      feedback: '',
+      feedback: "",
       followupDate: undefined,
-      rescheduleNoShow: 'no',
-      aiAdjustments: '',
+      rescheduleNoShow: "no",
+      aiAdjustments: "",
     },
   });
 
@@ -109,7 +119,7 @@ export default function DemoFeedbackDrawer(props: { refetch: () => void; onSubmi
     await postSubmitDemoFeedback(
       userToken,
       activeProspect.id,
-      'NO-SHOW',
+      "NO-SHOW",
       `3/5`,
       form.values.feedback,
       undefined,
@@ -119,8 +129,8 @@ export default function DemoFeedbackDrawer(props: { refetch: () => void; onSubmi
     await updateChannelStatus(
       activeProspect.id,
       userToken,
-      'LINKEDIN',
-      'ACTIVE_CONVO_SCHEDULING',
+      "LINKEDIN",
+      "ACTIVE_CONVO_SCHEDULING",
       false,
       true
     );
@@ -128,14 +138,14 @@ export default function DemoFeedbackDrawer(props: { refetch: () => void; onSubmi
     await sendAttemptingRescheduleNotification(userToken, activeProspect.id);
 
     queryClient.invalidateQueries({
-      queryKey: ['query-dash-get-prospects'],
+      queryKey: ["query-dash-get-prospects"],
     });
 
     showNotification({
-      id: 'demo-feedback-submit',
-      title: 'Prospect moved to scheduling',
-      message: 'This prospect has been moved back to scheduling.',
-      color: 'green',
+      id: "demo-feedback-submit",
+      title: "Prospect moved to scheduling",
+      message: "This prospect has been moved back to scheduling.",
+      color: "green",
       autoClose: 3000,
     });
 
@@ -144,10 +154,10 @@ export default function DemoFeedbackDrawer(props: { refetch: () => void; onSubmi
   };
 
   useEffect(() => {
-    if (form.values.demoHappen === 'reschedule') {
+    if (form.values.demoHappen === "reschedule") {
       setReschedule(true);
       setNoShow(false);
-    } else if (form.values.demoHappen === 'yes') {
+    } else if (form.values.demoHappen === "yes") {
       setReschedule(false);
       setShowedUp(true);
       setNoShow(false);
@@ -158,38 +168,50 @@ export default function DemoFeedbackDrawer(props: { refetch: () => void; onSubmi
     }
   }, [form.values.demoHappen]);
 
+  console.log("activeProspect", activeProspect);
+
   if (!activeProspect) return <></>;
 
   const submitDemoFeedback = async (values: typeof form.values) => {
     const res = await postSubmitDemoFeedback(
       userToken,
       activeProspect.id,
-      values.demoHappen === 'yes' ? 'OCCURRED' : 'NO-SHOW',
+      values.demoHappen === "yes" ? "OCCURRED" : "NO-SHOW",
       `${values.demoRating}/5`,
       values.feedback,
       values.followupDate
     );
 
-    if (res.status === 'success') {
-      if (values.demoHappen === 'yes') {
-        await updateChannelStatus(activeProspect.id, userToken, 'LINKEDIN', 'DEMO_WON');
-      } else if (values.demoHappen === 'reschedule') {
+    if (res.status === "success") {
+      if (values.demoHappen === "yes") {
+        await updateChannelStatus(
+          activeProspect.id,
+          userToken,
+          "LINKEDIN",
+          "DEMO_WON"
+        );
+      } else if (values.demoHappen === "reschedule") {
       } else {
-        await updateChannelStatus(activeProspect.id, userToken, 'LINKEDIN', 'DEMO_LOSS');
+        await updateChannelStatus(
+          activeProspect.id,
+          userToken,
+          "LINKEDIN",
+          "DEMO_LOSS"
+        );
       }
       showNotification({
-        id: 'demo-feedback-submit',
-        title: 'Feedback Submitted',
-        message: 'Your feedback has been submitted. Thank you!',
-        color: 'green',
+        id: "demo-feedback-submit",
+        title: "Feedback Submitted",
+        message: "Your feedback has been submitted. Thank you!",
+        color: "green",
         autoClose: 3000,
       });
     } else {
       showNotification({
-        id: 'demo-feedback-submit-fail',
-        title: 'Feedback Failed to Submit',
+        id: "demo-feedback-submit-fail",
+        title: "Feedback Failed to Submit",
         message: `Failed to submit your feedback (${res.status}). Please try again.`,
-        color: 'red',
+        color: "red",
         autoClose: false,
       });
     }
@@ -201,28 +223,28 @@ export default function DemoFeedbackDrawer(props: { refetch: () => void; onSubmi
     setDrawerProspectId(-1);
   };
 
+  console.log("actuallyOpened 2", actuallyOpened);
+
   return (
-    <Drawer
+    <Modal
       opened={actuallyOpened}
       onClose={() => {
         setDrawerProspectId(-1);
         setDrawerOpened(false);
       }}
       title={<Title order={3}>Demo Feedback</Title>}
-      padding='xl'
-      size='lg'
-      position='right'
-      sx={{ position: 'relative' }}
+      padding="xl"
+      size="lg"
     >
-      <Avatar src={Assistant} alt='AI Assistant' size={30} />
-      <Text fz='sm'>
-        You scheduled a demo with {activeProspect.full_name} - how did it go? Your feedback will be
-        used to improve our AI.
+      <Avatar src={Assistant} alt="AI Assistant" size={30} />
+      <Text fz="sm">
+        You scheduled a demo with {activeProspect.full_name} - how did it go?
+        Your feedback will be used to improve our AI.
       </Text>
 
       <form
         onSubmit={
-          noShow && form.values.rescheduleNoShow === 'yes'
+          noShow && form.values.rescheduleNoShow === "yes"
             ? () => {
                 moveToScheduling();
               }
@@ -231,74 +253,96 @@ export default function DemoFeedbackDrawer(props: { refetch: () => void; onSubmi
       >
         <Stack style={{ marginTop: 20 }}>
           <Title order={3}>Did the demo happen?</Title>
-          <Radio.Group name='demoHappen' {...form.getInputProps('demoHappen')}>
-            <Radio color='green' value='yes' label='Yes' mb='xs' />
-            <Radio color='green' value='no-show' label='No show' mb='xs' />
-            <Radio color='green' value='reschedule' label='Rescheduled' mb='xs' />
+          <Radio.Group name="demoHappen" {...form.getInputProps("demoHappen")}>
+            <Radio color="green" value="yes" label="Yes" mb="xs" />
+            <Radio color="green" value="no-show" label="No show" mb="xs" />
+            <Radio
+              color="green"
+              value="reschedule"
+              label="Rescheduled"
+              mb="xs"
+            />
           </Radio.Group>
 
           {showedUp && (
             <Stack spacing={5}>
-              <Text fw='bold' fz='md'>
+              <Text fw="bold" fz="md">
                 Follow up
               </Text>
               <Checkbox
-                label='I have a followup meeting scheduled with this Prospect.'
+                label="I have a followup meeting scheduled with this Prospect."
                 checked={followup}
                 onChange={(e) => setFollowup(e.target.checked)}
               />
-              <Flex align='center' justify='center' mt='md'>
-                {followup && <DatePicker size='xs' {...form.getInputProps('followupDate')} />}
+              <Flex align="center" justify="center" mt="md">
+                {followup && (
+                  <DatePicker
+                    size="xs"
+                    {...form.getInputProps("followupDate")}
+                  />
+                )}
               </Flex>
             </Stack>
           )}
 
-          {form.values.demoHappen !== 'reschedule' && (
+          {form.values.demoHappen !== "reschedule" && (
             <Textarea
               autosize
               minRows={2}
               maxRows={6}
               required
-              label={noShow ? 'What happened?' : 'How did it go?'}
-              placeholder='ex. Prospect is no longer working at their company....'
-              {...form.getInputProps('feedback')}
+              label={noShow ? "What happened?" : "How did it go?"}
+              placeholder="ex. Prospect is no longer working at their company...."
+              {...form.getInputProps("feedback")}
             />
           )}
 
           {noShow ? (
             <Card withBorder>
-              <Text mb='xs'>Do you want SellScale reschedule this demo?</Text>
+              <Text mb="xs">Do you want SellScale reschedule this demo?</Text>
               <Radio.Group
-                name='rescheduleNoShow'
-                {...form.getInputProps('rescheduleNoShow')}
-                mb='md'
-                defaultValue='no'
+                name="rescheduleNoShow"
+                {...form.getInputProps("rescheduleNoShow")}
+                mb="md"
+                defaultValue="no"
               >
-                <Radio color='green' value='yes' label='Yes' mb='xs' defaultChecked={false} />
-                <Radio color='green' value='no' label='No' mb='xs' defaultChecked={true} />
+                <Radio
+                  color="green"
+                  value="yes"
+                  label="Yes"
+                  mb="xs"
+                  defaultChecked={false}
+                />
+                <Radio
+                  color="green"
+                  value="no"
+                  label="No"
+                  mb="xs"
+                  defaultChecked={true}
+                />
               </Radio.Group>
-              {form.values.rescheduleNoShow === 'yes' ? (
+              {form.values.rescheduleNoShow === "yes" ? (
                 <Tooltip
                   withinPortal
-                  label='This will move the prospect back to a scheduling status.'
+                  label="This will move the prospect back to a scheduling status."
                 >
                   <Button
                     leftIcon={<IconCalendar />}
-                    color='green'
-                    variant='filled'
-                    size='sm'
-                    radius='xl'
+                    color="green"
+                    variant="filled"
+                    size="sm"
+                    radius="xl"
                     onClick={() => moveToScheduling()}
                   >
                     Move back to scheduling
                   </Button>
                 </Tooltip>
               ) : (
-                ''
+                ""
               )}
             </Card>
           ) : (
-            ''
+            ""
           )}
 
           {reschedule ? (
@@ -307,7 +351,7 @@ export default function DemoFeedbackDrawer(props: { refetch: () => void; onSubmi
             <>
               <Stack spacing={5}>
                 <Title order={3}>How did it go?</Title>
-                <DemoRating {...form.getInputProps('demoRating')} />
+                <DemoRating {...form.getInputProps("demoRating")} />
               </Stack>
               {/* <Textarea
                   autosize
@@ -321,27 +365,32 @@ export default function DemoFeedbackDrawer(props: { refetch: () => void; onSubmi
                 autosize
                 minRows={2}
                 maxRows={6}
-                label='AI adjustments from feedback (optional)'
-                {...form.getInputProps('aiAdjustments')}
+                label="AI adjustments from feedback (optional)"
+                {...form.getInputProps("aiAdjustments")}
               />
             </>
           ) : (
-            ''
+            ""
           )}
         </Stack>
 
-        {noShow && form.values.rescheduleNoShow !== 'no' ? (
-          ''
+        {noShow && form.values.rescheduleNoShow !== "no" ? (
+          ""
         ) : (
-          <Flex justify='center' mt='xl'>
+          <Flex justify="center" mt="xl">
             <Group>
-              <Button hidden={reschedule} type='submit' color='green' radius='xl'>
+              <Button
+                hidden={reschedule}
+                type="submit"
+                color="green"
+                radius="xl"
+              >
                 Submit feedback
               </Button>
             </Group>
           </Flex>
         )}
       </form>
-    </Drawer>
+    </Modal>
   );
 }

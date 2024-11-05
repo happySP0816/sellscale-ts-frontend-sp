@@ -11,6 +11,7 @@ import {
   Group,
   HoverCard,
   List,
+  Loader,
   Modal,
   MultiSelect,
   ScrollArea,
@@ -19,6 +20,7 @@ import {
   Text,
   Textarea,
   TextInput,
+  Title,
   Tooltip,
 } from "@mantine/core";
 import {
@@ -42,7 +44,9 @@ import { useRecoilValue } from "recoil";
 import { API_URL } from "@constants/data";
 import { userTokenState } from "@atoms/userAtoms";
 import { showNotification } from "@mantine/notifications";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { getPersonasOverview } from "@utils/requests/getPersonas";
+import { CTA, PersonaOverview } from "src";
 
 function LineClampText({ content }: { content: string }) {
   const [clamp, setClamp] = useState<number | undefined>(6);
@@ -72,6 +76,26 @@ export default function CardView(props: any) {
   const [openedBaseline, { toggle: baselineToggle }] = useDisclosure(false);
   const [openedOther, { toggle: otherToggle }] = useDisclosure(false);
 
+  const campaignId = props.campaignId as number | null;
+
+  const [addingSequenceLoading, setAddingSequenceLoading] =
+    useState<boolean>(false);
+
+  const { data: personas, refetch: refetchPersonas } = useQuery({
+    queryKey: ["overview-personas"],
+    queryFn: async () => {
+      const response = await getPersonasOverview(userToken);
+
+      if (response.status === "success") {
+        const data = response.data as PersonaOverview[];
+
+        return data;
+      } else {
+        return [];
+      }
+    },
+  });
+
   const [stepModalOpened, { open: stepOpen, close: stepClose }] =
     useDisclosure(false);
   const [useModalOpened, { open: useOpen, close: useClose }] =
@@ -89,6 +113,9 @@ export default function CardView(props: any) {
   const queryClient = useQueryClient();
 
   const [textFilterOther, setTextFilterOther] = useState<string>("");
+
+  const [addToSequenceModalIsOpen, setAddToSequenceModalIsOpen] =
+    useState(false);
 
   const [otherAssetPagination, setOtherAssetPagination] = useState<number>(0);
 
@@ -216,10 +243,68 @@ export default function CardView(props: any) {
     }
   };
 
+  const [selectedCampaign, setSelectedCampaign] =
+    useState<PersonaOverview | null>(
+      personas && campaignId
+        ? personas!.find((persona) => persona.id === campaignId) ?? null
+        : null
+    );
+
+  const addToSequence = async function () {
+    setAddingSequenceLoading(true);
+    const campaignId = selectedCampaign?.id;
+    const assetId = editAsset?.id;
+
+    const response = await fetch(
+      `${API_URL}/client/asset/add_messaging_assets_to_campaign`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${userToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          asset_id: assetId,
+          campaign_id: campaignId,
+        }),
+      }
+    );
+
+    if (response.ok) {
+      showNotification({
+        title: "Success!",
+        message: "Added asset to campaign.",
+        color: "green",
+      });
+
+      setAddingSequenceLoading(false);
+      setAddToSequenceModalIsOpen(false);
+      queryClient.invalidateQueries(["get-assets"]);
+    } else {
+      showNotification({
+        title: "Error",
+        message: "Could not add asset to campaign.",
+        color: "red",
+      });
+
+      setAddingSequenceLoading(false);
+    }
+  };
+
+  const isSequenceType = function (item: AssetType) {
+    return (
+      item.asset_tag === "CTA" ||
+      item.asset_tag === "Linkedin Initial Template" ||
+      item.asset_tag === "Email Initial Template" ||
+      item.asset_tag === "Linkedin Bump Framework" ||
+      item.asset_tag === "Email Followup"
+    );
+  };
+
   return (
     <>
       <Modal
-        opened={!!editAsset}
+        opened={!!editAsset && !addToSequenceModalIsOpen}
         onClose={() => setEditAsset(undefined)}
         title="Edit Asset"
       >
@@ -326,7 +411,7 @@ export default function CardView(props: any) {
                 { value: "Value Props", label: "Value Props" },
                 { value: "Phrases", label: "Phrases" },
                 { value: "Social Proof", label: "Social Proof" },
-                { value: "Paint Points", label: "Paint Points"}
+                { value: "Paint Points", label: "Paint Points" },
               ]}
               value={editAsset.asset_tag}
               onChange={(value) =>
@@ -393,6 +478,65 @@ export default function CardView(props: any) {
           </Stack>
         )}
       </Modal>
+      <Modal
+        opened={addToSequenceModalIsOpen}
+        onClose={() => {
+          setAddToSequenceModalIsOpen(false);
+          setEditAsset(undefined);
+        }}
+        title={"Add To Sequence"}
+        style={{
+          minHeight: "500px",
+        }}
+      >
+        <Flex gap={"16px"} direction={"column"}>
+          <Text size={"md"}>
+            Add an non-generated asset (CTAs, templates) to a campaign sequence.
+            The asset will be added to the same step and status of the original
+            asset.
+          </Text>
+          <Text size={"sm"} fw={400}>
+            Note: You cannot do this again if you have already added the asset
+            to the sequence.
+          </Text>
+          <Select
+            withinPortal={true}
+            label={"Select Sequence"}
+            value={selectedCampaign ? "" + selectedCampaign.id : null}
+            data={
+              personas
+                ? personas.map((persona) => {
+                    return {
+                      value: "" + persona.id,
+                      label: `${persona.id}: ${persona.name}`,
+                    };
+                  })
+                : []
+            }
+            onChange={(e) => {
+              setSelectedCampaign(
+                e
+                  ? personas
+                    ? personas.find((p) => p.id === +e) ?? null
+                    : null
+                  : null
+              );
+            }}
+            dropdownPosition={"bottom"}
+          />
+          <Button
+            disabled={
+              campaignId
+                ? editAsset?.client_archetype_ids?.includes(campaignId)
+                : !selectedCampaign
+            }
+            onClick={async () => await addToSequence()}
+            variant={"outline"}
+          >
+            {addingSequenceLoading ? <Loader /> : "Add to Campaign"}
+          </Button>
+        </Flex>
+      </Modal>
       <Stack mt={"lg"}>
         <Flex gap={"sm"} align={"center"} w={"100%"}>
           <Text sx={{ whiteSpace: "nowrap" }} color="gray" fw={500}>
@@ -434,23 +578,36 @@ export default function CardView(props: any) {
                           </Button>
                         )}
                       </Flex>
-                      <Flex gap={"5px"}>
-                        <Badge
-                          size="sm"
-                          color={
-                            item.asset_type === "PDF"
-                              ? "pink"
-                              : item?.asset_type === "URL"
-                              ? "orange"
-                              : "green"
-                          }
-                        >
-                          {item?.asset_tag}
-                        </Badge>
-                        {item.is_new_asset && (
-                          <Badge size="sm" color="green">
-                            New!
+                      <Flex justify={"space-between"} align={"center"}>
+                        <Flex align={"center"} gap={"5px"}>
+                          <Badge
+                            size="sm"
+                            color={
+                              item.asset_type === "PDF"
+                                ? "pink"
+                                : item?.asset_type === "URL"
+                                ? "orange"
+                                : "green"
+                            }
+                          >
+                            {item?.asset_tag}
                           </Badge>
+                          {item.is_new_asset && (
+                            <Badge size="sm" color="green">
+                              New!
+                            </Badge>
+                          )}
+                        </Flex>
+                        {isSequenceType(item) && (
+                          <Button
+                            size={"xs"}
+                            onClick={() => {
+                              setEditAsset(item);
+                              setAddToSequenceModalIsOpen(true);
+                            }}
+                          >
+                            Add{" "}
+                          </Button>
                         )}
                       </Flex>
                       <Flex align={"center"} w={"fit-content"}>
@@ -615,23 +772,36 @@ export default function CardView(props: any) {
                           </Button>
                         )}
                       </Flex>
-                      <Flex gap={"5px"}>
-                        <Badge
-                          size="sm"
-                          color={
-                            item.asset_type === "PDF"
-                              ? "pink"
-                              : item?.asset_type === "URL"
-                              ? "orange"
-                              : "green"
-                          }
-                        >
-                          {item?.asset_tag}
-                        </Badge>
-                        {item.is_new_asset && (
-                          <Badge size="sm" color="green">
-                            New!
+                      <Flex justify={"space-between"} align={"center"}>
+                        <Flex align={"center"} gap={"5px"}>
+                          <Badge
+                            size="sm"
+                            color={
+                              item.asset_type === "PDF"
+                                ? "pink"
+                                : item?.asset_type === "URL"
+                                ? "orange"
+                                : "green"
+                            }
+                          >
+                            {item?.asset_tag}
                           </Badge>
+                          {item.is_new_asset && (
+                            <Badge size="sm" color="green">
+                              New!
+                            </Badge>
+                          )}
+                        </Flex>
+                        {isSequenceType(item) && (
+                          <Button
+                            size={"xs"}
+                            onClick={() => {
+                              setEditAsset(item);
+                              setAddToSequenceModalIsOpen(true);
+                            }}
+                          >
+                            Add
+                          </Button>
                         )}
                       </Flex>
                       <Flex align={"center"} w={"fit-content"}>
@@ -810,11 +980,14 @@ export default function CardView(props: any) {
             </Flex>
             <Grid>
               {otherAssets
-                .filter((item: AssetType) =>
-                  item.asset_key
-                    .toLowerCase()
-                    .includes(textFilterOther.toLowerCase())
-                )
+                .filter((item: AssetType) => {
+                  const lowerSearch = textFilterOther.toLowerCase();
+
+                  return (
+                    item.asset_key.toLowerCase().includes(lowerSearch) ||
+                    item.asset_tag.toLowerCase().includes(lowerSearch)
+                  );
+                })
                 .slice(
                   otherAssetPagination * 10,
                   (otherAssetPagination + 1) * 10
@@ -847,23 +1020,36 @@ export default function CardView(props: any) {
                             </Button>
                           )}
                         </Flex>
-                        <Flex gap={"5px"}>
-                          <Badge
-                            size="sm"
-                            color={
-                              item.asset_type === "PDF"
-                                ? "pink"
-                                : item?.asset_type === "URL"
-                                ? "orange"
-                                : "green"
-                            }
-                          >
-                            {item?.asset_tag}
-                          </Badge>
-                          {item.is_new_asset && (
-                            <Badge size="sm" color="green">
-                              New!
+                        <Flex justify={"space-between"} align={"center"}>
+                          <Flex align={"center"} gap={"5px"}>
+                            <Badge
+                              size="sm"
+                              color={
+                                item.asset_type === "PDF"
+                                  ? "pink"
+                                  : item?.asset_type === "URL"
+                                  ? "orange"
+                                  : "green"
+                              }
+                            >
+                              {item?.asset_tag}
                             </Badge>
+                            {item.is_new_asset && (
+                              <Badge size="sm" color="green">
+                                New!
+                              </Badge>
+                            )}
+                          </Flex>
+                          {isSequenceType(item) && (
+                            <Button
+                              size={"xs"}
+                              onClick={() => {
+                                setEditAsset(item);
+                                setAddToSequenceModalIsOpen(true);
+                              }}
+                            >
+                              Add
+                            </Button>
                           )}
                         </Flex>
                         <Flex align={"center"} w={"fit-content"}>

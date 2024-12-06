@@ -1,14 +1,9 @@
 <img src="https://uploads-ssl.webflow.com/6353a854c4fa2d460377c061/63642a6e9b19034a8b42547d_Group%2018-p-500.png" style="width: 200px;">
 <br/>
 
-## Supercharge your outbound with AI
+## Supercharge your outbound with AI (TS Project)
 <br/>
 <br/>
-
-<span><img src="https://shields.io/badge/Coverage-0%25-red">
-<img src="https://img.shields.io/badge/Framework-React-blue">
-<img src="https://img.shields.io/badge/Component Library-Mantine-blue">
-<img src="https://img.shields.io/badge/Testing-0 unit tests-red"></span>
 
 # Table of Contents
 

@@ -645,9 +645,7 @@ export default function App() {
   const userToken = useRecoilValue(userTokenState);
   const [currentProject, setCurrentProject] = useRecoilState(currentProjectState);
 
-  useEffect(() => {
-    posthog.setPersonPropertiesForFlags({ distinct_id: userData?.id }, false);
-  });
+  useEffect(() => { posthog.setPersonPropertiesForFlags({ distinct_id: userData?.id }, false); });
 
   // Set persona query param
   const [searchParams] = useSearchParams();

@@ -359,12 +359,12 @@ export default function SellscaleChat() {
     }
   }
 
-  // useEffect(() => {
-  //   if (!hasCalledHandleChat.current && chatbot) {
-  //     handleChat(index, true);
-  //     hasCalledHandleChat.current = true;
-  //   }
-  // }, [chatbot]);
+  useEffect(() => {
+    if (!hasCalledHandleChat.current && chatbot) {
+      handleChat(index, true);
+      hasCalledHandleChat.current = true;
+    }
+  }, [chatbot]);
 
   useEffect(() => {
     viewport.current?.scrollTo({ top: viewport.current.scrollHeight });
@@ -544,7 +544,7 @@ export default function SellscaleChat() {
                               }}
                               p={"sm"}
                             >
-                              {/* <span
+                              <span
                                 style={{
                                   color: '#d444f1',
                                   fontWeight: 600,
@@ -558,7 +558,7 @@ export default function SellscaleChat() {
                               >
                                 <IconSparkles size={'0.9rem'} />
                                 Finding Prospects:{' '}
-                              </span> */}
+                              </span>
                               <span
                                 style={{
                                   color: "#d444f1",

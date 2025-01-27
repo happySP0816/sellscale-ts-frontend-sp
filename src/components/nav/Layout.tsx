@@ -55,7 +55,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       navbar={<>{isLoggedIn() && <SideNavbar />}</>}
       header={
         adminData?.role === "ADMIN" ? <AdminHeader /> : undefined
-        /*
         isMobileView ? (
           <Header height={NAV_BAR_TOP_WIDTH}>
             <div
@@ -91,7 +90,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           </Header>
         ) : (
           <></>
-        )*/
+        )
       }
       styles={(theme) => ({
         main: {

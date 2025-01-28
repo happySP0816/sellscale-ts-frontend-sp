@@ -14,9 +14,9 @@ export default function RestrictedRoute(props: { page: React.ReactNode }) {
       if (!isLoggedIn()) {
         navigateToPage(navigate, "/login");
       }
-      // else if(userData && !userData.onboarded){
-      //   navigateToPage(navigate, '/onboarding');
-      // }
+      else if(userData && !userData.onboarded){
+        navigateToPage(navigate, '/onboarding');
+      }
     });
   }, []);
 

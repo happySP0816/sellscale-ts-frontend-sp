@@ -11,31 +11,15 @@ import {
   Loader,
   Badge,
   SimpleGrid,
-  ActionIcon,
-  Popover,
-  Pagination,
-  NumberInput,
   Avatar,
 } from "@mantine/core";
 import { Line } from "react-chartjs-2";
 import {
-  IconSparkles,
   IconSend,
   IconChecks,
   IconMessageCheck,
   IconCalendar,
-  IconChevronLeft,
-  IconChevronRight,
-  IconUser,
-  IconMessages,
-  IconLetterT,
-  IconToggleRight,
-  IconExternalLink,
-  IconBallpen,
 } from "@tabler/icons-react";
-import { openContextModal } from "@mantine/modals";
-import { DataGrid } from "mantine-data-grid";
-import { useDisclosure } from "@mantine/hooks";
 import { IconArrowRight } from "@tabler/icons";
 
 const AnalyticsItem = ({ dailyData, templateAnalytics, topIcpPeople, summaryData, showCumulative }: any) => {
@@ -436,7 +420,7 @@ const AnalyticsItem = ({ dailyData, templateAnalytics, topIcpPeople, summaryData
                       <span>Positive Replies</span>
                     </Text>
                     <Divider w={"100%"} />
-                    {/* <Flex>
+                    <Flex>
                       <ActionIcon
                         onClick={() => {
                           if (sentimentPage > 0) setSentimentPage((page) => (page = page - 1));
@@ -447,7 +431,7 @@ const AnalyticsItem = ({ dailyData, templateAnalytics, topIcpPeople, summaryData
                       <ActionIcon>
                         <IconChevronRight />
                       </ActionIcon>
-                    </Flex> */}
+                    </Flex>
                   </Flex>
                   <Paper withBorder radius={"sm"}>
                     <ScrollArea h={300} p={"sm"} scrollbarSize={8} offsetScrollbars>
@@ -595,7 +579,7 @@ const AnalyticsItem = ({ dailyData, templateAnalytics, topIcpPeople, summaryData
                         >
                           View Conversation
                         </Button>
-                        {/* <Flex direction={"column"} mt={4} align={"center"} p={"sm"} justify={"space-between"} gap={4}>
+                        <Flex direction={"column"} mt={4} align={"center"} p={"sm"} justify={"space-between"} gap={4}>
                           <Text size={"sm"} align="center" fw={600}>
                             {icpItem.full_name}
                           </Text>
@@ -653,7 +637,7 @@ const AnalyticsItem = ({ dailyData, templateAnalytics, topIcpPeople, summaryData
                           >
                             View Conversation
                           </Badge>
-                        </Flex> */}
+                        </Flex>
                       </Paper>
                     );
                   })}
